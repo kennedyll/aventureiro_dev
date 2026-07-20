@@ -446,26 +446,153 @@ var DEFAULT_EMPLOYABILITY = [
 ];
 
 var SKILL_DEFS = [
-  { id:'const_ferro', name:'Constância de Ferro', color:'estudo', icon:'book',
+  // ---- Estudo (sequência de dias) ----
+  { id:'estudo_3', name:'Fagulha do Saber', color:'estudo', icon:'book', group:'Estudo',
+    desc:'Estude 3 dias seguidos.', need:3, prog:function(s){return streakFor(s,'estudo');} },
+  { id:'estudo_7', name:'Constância de Ferro', color:'estudo', icon:'book', group:'Estudo',
     desc:'Estude 7 dias seguidos.', need:7, prog:function(s){return streakFor(s,'estudo');} },
-  { id:'mente_aberta', name:'Mente Aberta', color:'leitura', icon:'bookmark',
+  { id:'estudo_14', name:'Disciplina de Aço', color:'estudo', icon:'book', group:'Estudo',
+    desc:'Estude 14 dias seguidos.', need:14, prog:function(s){return streakFor(s,'estudo');} },
+  { id:'estudo_30', name:'Rotina Inabalável', color:'estudo', icon:'book', group:'Estudo',
+    desc:'Estude 30 dias seguidos.', need:30, prog:function(s){return streakFor(s,'estudo');} },
+  { id:'estudo_60', name:'Forja do Conhecimento', color:'estudo', icon:'book', group:'Estudo',
+    desc:'Estude 60 dias seguidos.', need:60, prog:function(s){return streakFor(s,'estudo');} },
+  { id:'estudo_100', name:'Mente Eterna', color:'estudo', icon:'book', group:'Estudo',
+    desc:'Estude 100 dias seguidos.', need:100, prog:function(s){return streakFor(s,'estudo');} },
+
+  // ---- Leitura (sequência de dias) ----
+  { id:'leitura_3', name:'Primeira Página', color:'leitura', icon:'bookmark', group:'Leitura',
+    desc:'Leia 3 dias seguidos.', need:3, prog:function(s){return streakFor(s,'leitura');} },
+  { id:'leitura_7', name:'Mente Aberta', color:'leitura', icon:'bookmark', group:'Leitura',
+    desc:'Leia 7 dias seguidos.', need:7, prog:function(s){return streakFor(s,'leitura');} },
+  { id:'leitura_14', name:'Devorador de Capítulos', color:'leitura', icon:'bookmark', group:'Leitura',
     desc:'Leia 14 dias seguidos.', need:14, prog:function(s){return streakFor(s,'leitura');} },
-  { id:'punho_forjado', name:'Punho Forjado', color:'boxe', icon:'glove',
+  { id:'leitura_30', name:'Biblioteca Viva', color:'leitura', icon:'bookmark', group:'Leitura',
+    desc:'Leia 30 dias seguidos.', need:30, prog:function(s){return streakFor(s,'leitura');} },
+  { id:'leitura_60', name:'Sábio Incansável', color:'leitura', icon:'bookmark', group:'Leitura',
+    desc:'Leia 60 dias seguidos.', need:60, prog:function(s){return streakFor(s,'leitura');} },
+  { id:'leitura_100', name:'Guardião dos Pergaminhos', color:'leitura', icon:'bookmark', group:'Leitura',
+    desc:'Leia 100 dias seguidos.', need:100, prog:function(s){return streakFor(s,'leitura');} },
+
+  // ---- Boxe (sessões totais) ----
+  { id:'boxe_4', name:'Punho Forjado', color:'boxe', icon:'glove', group:'Boxe',
     desc:'Complete 4 sessões de boxe.', need:4, prog:function(s){return countDone(s,'boxe');} },
-  { id:'corpo_aco', name:'Corpo de Aço', color:'academia', icon:'dumbbell',
-    desc:'Complete 8 sessões de academia.', need:8, prog:function(s){return countDone(s,'academia');} },
-  { id:'folego_longo', name:'Fôlego Longo', color:'corrida', icon:'run',
+  { id:'boxe_8', name:'Golpe Certeiro', color:'boxe', icon:'glove', group:'Boxe',
+    desc:'Complete 8 sessões de boxe.', need:8, prog:function(s){return countDone(s,'boxe');} },
+  { id:'boxe_16', name:'Guarda de Ferro', color:'boxe', icon:'glove', group:'Boxe',
+    desc:'Complete 16 sessões de boxe.', need:16, prog:function(s){return countDone(s,'boxe');} },
+  { id:'boxe_30', name:'Fera do Ringue', color:'boxe', icon:'glove', group:'Boxe',
+    desc:'Complete 30 sessões de boxe.', need:30, prog:function(s){return countDone(s,'boxe');} },
+  { id:'boxe_50', name:'Punho Lendário', color:'boxe', icon:'glove', group:'Boxe',
+    desc:'Complete 50 sessões de boxe.', need:50, prog:function(s){return countDone(s,'boxe');} },
+  { id:'boxe_100', name:'Campeão Invicto', color:'boxe', icon:'glove', group:'Boxe',
+    desc:'Complete 100 sessões de boxe.', need:100, prog:function(s){return countDone(s,'boxe');} },
+
+  // ---- Academia (sessões totais) ----
+  { id:'academia_6', name:'Corpo de Aço', color:'academia', icon:'dumbbell', group:'Academia',
+    desc:'Complete 6 sessões de academia.', need:6, prog:function(s){return countDone(s,'academia');} },
+  { id:'academia_12', name:'Músculo de Titânio', color:'academia', icon:'dumbbell', group:'Academia',
+    desc:'Complete 12 sessões de academia.', need:12, prog:function(s){return countDone(s,'academia');} },
+  { id:'academia_24', name:'Força Bruta', color:'academia', icon:'dumbbell', group:'Academia',
+    desc:'Complete 24 sessões de academia.', need:24, prog:function(s){return countDone(s,'academia');} },
+  { id:'academia_48', name:'Colosso', color:'academia', icon:'dumbbell', group:'Academia',
+    desc:'Complete 48 sessões de academia.', need:48, prog:function(s){return countDone(s,'academia');} },
+  { id:'academia_80', name:'Hércules Moderno', color:'academia', icon:'dumbbell', group:'Academia',
+    desc:'Complete 80 sessões de academia.', need:80, prog:function(s){return countDone(s,'academia');} },
+  { id:'academia_150', name:'Semideus do Ferro', color:'academia', icon:'dumbbell', group:'Academia',
+    desc:'Complete 150 sessões de academia.', need:150, prog:function(s){return countDone(s,'academia');} },
+
+  // ---- Corrida (sessões totais) ----
+  { id:'corrida_4', name:'Fôlego Longo', color:'corrida', icon:'run', group:'Corrida',
     desc:'Complete 4 corridas de sábado.', need:4, prog:function(s){return countDone(s,'corrida');} },
-  { id:'guerreiro_fs', name:'Guerreiro Full Stack', color:'gold', icon:'trophy',
+  { id:'corrida_8', name:'Vento Constante', color:'corrida', icon:'run', group:'Corrida',
+    desc:'Complete 8 corridas de sábado.', need:8, prog:function(s){return countDone(s,'corrida');} },
+  { id:'corrida_16', name:'Maratonista Nato', color:'corrida', icon:'run', group:'Corrida',
+    desc:'Complete 16 corridas de sábado.', need:16, prog:function(s){return countDone(s,'corrida');} },
+  { id:'corrida_30', name:'Pernas de Aço', color:'corrida', icon:'run', group:'Corrida',
+    desc:'Complete 30 corridas de sábado.', need:30, prog:function(s){return countDone(s,'corrida');} },
+  { id:'corrida_50', name:'Corredor Incansável', color:'corrida', icon:'run', group:'Corrida',
+    desc:'Complete 50 corridas de sábado.', need:50, prog:function(s){return countDone(s,'corrida');} },
+  { id:'corrida_100', name:'Lenda do Asfalto', color:'corrida', icon:'run', group:'Corrida',
+    desc:'Complete 100 corridas de sábado.', need:100, prog:function(s){return countDone(s,'corrida');} },
+
+  // ---- Trilha de Estudo (fases do roteiro Java) ----
+  { id:'fase0', name:'Primeiro Feitiço', color:'gold', icon:'book', group:'Trilha de Estudo',
+    desc:'Conclua a Fase 0 — Fundamentos.', need:1, prog:function(s){return phaseComplete(s,0)?1:0;} },
+  { id:'fase1', name:'Mestre das Classes', color:'gold', icon:'book', group:'Trilha de Estudo',
+    desc:'Conclua a Fase 1 — Orientação a Objetos.', need:1, prog:function(s){return phaseComplete(s,1)?1:0;} },
+  { id:'fase2', name:'Domador de Ferramentas', color:'gold', icon:'book', group:'Trilha de Estudo',
+    desc:'Conclua a Fase 2 — Ferramentas Essenciais.', need:1, prog:function(s){return phaseComplete(s,2)?1:0;} },
+  { id:'fase3', name:'Guardião dos Dados', color:'gold', icon:'book', group:'Trilha de Estudo',
+    desc:'Conclua a Fase 3 — Persistência e Banco de Dados.', need:1, prog:function(s){return phaseComplete(s,3)?1:0;} },
+  { id:'guerreiro_fs', name:'Guerreiro Full Stack', color:'gold', icon:'trophy', group:'Trilha de Estudo',
     desc:'Conclua a Fase 4 — Spring Boot.', need:1, prog:function(s){return phaseComplete(s,4)?1:0;} },
-  { id:'lenda_codex', name:'Lenda do Códex', color:'gold', icon:'star',
+  { id:'fase5', name:'Arquiteto Consolidado', color:'gold', icon:'book', group:'Trilha de Estudo',
+    desc:'Conclua a Fase 5 — Consolidação e Portfólio.', need:1, prog:function(s){return phaseComplete(s,5)?1:0;} },
+  { id:'lenda_codex', name:'Lenda do Códex', color:'gold', icon:'star', group:'Trilha de Estudo',
     desc:'Conclua as 6 fases do roteiro Java.', need:1, prog:function(s){
       for(var i=0;i<STUDY_PHASES.length;i++){ if(!phaseComplete(s,i)) return 0; } return 1; } },
-  { id:'pronto_combate', name:'Pronto pro Combate', color:'gold', icon:'briefcase',
+
+  // ---- Mapa Avançado de Backend (side quests) ----
+  { id:'bonus0', name:'Filho da Internet', color:'gold', icon:'trophy', group:'Mapa de Backend',
+    desc:'Complete o grupo Internet & Fundamentos.', need:1, prog:function(s){return bonusGroupComplete(s,0)?1:0;} },
+  { id:'bonus1', name:'Mestre do Git', color:'gold', icon:'trophy', group:'Mapa de Backend',
+    desc:'Complete o grupo Controle de Versão.', need:1, prog:function(s){return bonusGroupComplete(s,1)?1:0;} },
+  { id:'bonus2', name:'Guardião dos Dados Relacionais', color:'gold', icon:'trophy', group:'Mapa de Backend',
+    desc:'Complete o grupo Bancos de Dados.', need:1, prog:function(s){return bonusGroupComplete(s,2)?1:0;} },
+  { id:'bonus3', name:'Arquiteto de APIs', color:'gold', icon:'trophy', group:'Mapa de Backend',
+    desc:'Complete o grupo APIs.', need:1, prog:function(s){return bonusGroupComplete(s,3)?1:0;} },
+  { id:'bonus4', name:'Caçador de Latência', color:'gold', icon:'trophy', group:'Mapa de Backend',
+    desc:'Complete o grupo Cache & Performance.', need:1, prog:function(s){return bonusGroupComplete(s,4)?1:0;} },
+  { id:'bonus5', name:'Sentinela da Segurança', color:'gold', icon:'trophy', group:'Mapa de Backend',
+    desc:'Complete o grupo Segurança.', need:1, prog:function(s){return bonusGroupComplete(s,5)?1:0;} },
+  { id:'bonus6', name:'Guardião da Qualidade', color:'gold', icon:'trophy', group:'Mapa de Backend',
+    desc:'Complete o grupo Testes & CI/CD.', need:1, prog:function(s){return bonusGroupComplete(s,6)?1:0;} },
+  { id:'bonus7', name:'Mestre dos Padrões', color:'gold', icon:'trophy', group:'Mapa de Backend',
+    desc:'Complete o grupo Arquitetura & Padrões.', need:1, prog:function(s){return bonusGroupComplete(s,7)?1:0;} },
+  { id:'bonus8', name:'Senhor da Infraestrutura', color:'gold', icon:'trophy', group:'Mapa de Backend',
+    desc:'Complete o grupo Escalabilidade & Infra.', need:1, prog:function(s){return bonusGroupComplete(s,8)?1:0;} },
+
+  // ---- Carreira / Empregabilidade ----
+  { id:'emprego_3', name:'Primeiros Passos na Carreira', color:'gold', icon:'briefcase', group:'Carreira',
+    desc:'Complete 3 tarefas de empregabilidade.', need:3, prog:function(s){return s.employability.filter(function(t){return t.done;}).length;} },
+  { id:'emprego_6', name:'Pronto pro Combate', color:'gold', icon:'briefcase', group:'Carreira',
+    desc:'Complete 6 tarefas de empregabilidade.', need:6, prog:function(s){return s.employability.filter(function(t){return t.done;}).length;} },
+  { id:'emprego_all', name:'Caçador de Vagas Lendário', color:'gold', icon:'briefcase', group:'Carreira',
     desc:'Complete toda a trilha de empregabilidade.', need:1, prog:function(s){
       if(!s.employability.length) return 0;
-      return s.employability.every(function(t){return t.done;}) ? 1 : 0; } }
+      return s.employability.every(function(t){return t.done;}) ? 1 : 0; } },
+
+  // ---- Diário de Bordo ----
+  { id:'diario_5', name:'Primeiras Memórias', color:'leitura', icon:'feather', group:'Diário de Bordo',
+    desc:'Escreva 5 entradas no diário.', need:5, prog:function(s){return s.diary.length;} },
+  { id:'diario_15', name:'Cronista da Jornada', color:'leitura', icon:'feather', group:'Diário de Bordo',
+    desc:'Escreva 15 entradas no diário.', need:15, prog:function(s){return s.diary.length;} },
+  { id:'diario_30', name:'Guardião das Memórias', color:'leitura', icon:'feather', group:'Diário de Bordo',
+    desc:'Escreva 30 entradas no diário.', need:30, prog:function(s){return s.diary.length;} },
+  { id:'diario_60', name:'Historiador Lendário', color:'leitura', icon:'feather', group:'Diário de Bordo',
+    desc:'Escreva 60 entradas no diário.', need:60, prog:function(s){return s.diary.length;} },
+
+  // ---- Dias Perfeitos ----
+  { id:'perfeito_5', name:'Dia Impecável', color:'gold', icon:'fire', group:'Dias Perfeitos',
+    desc:'Alcance 5 dias perfeitos.', need:5, prog:function(s){return countPerfectDays(s);} },
+  { id:'perfeito_15', name:'Sequência de Ouro', color:'gold', icon:'fire', group:'Dias Perfeitos',
+    desc:'Alcance 15 dias perfeitos.', need:15, prog:function(s){return countPerfectDays(s);} },
+  { id:'perfeito_30', name:'Mês Perfeito', color:'gold', icon:'fire', group:'Dias Perfeitos',
+    desc:'Alcance 30 dias perfeitos.', need:30, prog:function(s){return countPerfectDays(s);} },
+  { id:'perfeito_60', name:'Perfeição Absoluta', color:'gold', icon:'fire', group:'Dias Perfeitos',
+    desc:'Alcance 60 dias perfeitos.', need:60, prog:function(s){return countPerfectDays(s);} },
+
+  // ---- Ascensão de Nível ----
+  { id:'nivel_10', name:'Ascensão do Cavaleiro', color:'gold', icon:'star', group:'Ascensão de Nível',
+    desc:'Alcance o nível 10.', need:10, prog:function(s){return levelOf(s);} },
+  { id:'nivel_20', name:'Ascensão do Arquimago', color:'gold', icon:'star', group:'Ascensão de Nível',
+    desc:'Alcance o nível 20.', need:20, prog:function(s){return levelOf(s);} },
+  { id:'nivel_30', name:'Transcendência do Códex', color:'gold', icon:'star', group:'Ascensão de Nível',
+    desc:'Alcance o nível 30.', need:30, prog:function(s){return levelOf(s);} }
 ];
+
+var SKILL_GROUPS = ['Estudo','Leitura','Boxe','Academia','Corrida','Trilha de Estudo','Mapa de Backend','Carreira','Diário de Bordo','Dias Perfeitos','Ascensão de Nível'];
 
 var CATS = {
   estudo:{label:'Estudo', color:'estudo', icon:'book'},
@@ -638,6 +765,16 @@ function phaseComplete(s, idx){
   var arr = s.javaProgress[idx];
   return arr && arr.every(function(v){return v;});
 }
+function bonusGroupComplete(s, gi){
+  var arr = s.bonusProgress[gi];
+  return arr && arr.every(function(v){return v;});
+}
+function countPerfectDays(s){
+  var n=0;
+  for(var k in s.taskLog){ if(s.taskLog[k] && s.taskLog[k].perfectAwarded) n++; }
+  return n;
+}
+function levelOf(s){ return Math.floor(s.totalXP/100)+1; }
 function todaysCategories(){
   var dow = new Date().getDay();
   var out = [];
@@ -925,21 +1062,30 @@ function renderEstudo(){
 }
 
 function renderHabilidades(){
+  var totalUnlocked = SKILL_DEFS.filter(function(sk){ return sk.prog(state) >= sk.need; }).length;
   var html = '<div class="page-head"><span class="eyebrow">Conquistas</span><h1>Árvore de Habilidades</h1>'+
-    '<p>Desbloqueadas pela sua constância nos treinos e estudos.</p></div>';
-  html += '<div class="skill-grid">';
-  SKILL_DEFS.forEach(function(sk){
-    var prog = sk.prog(state), unlocked = prog >= sk.need, p = Math.min(100, Math.round(100*prog/sk.need));
-    html += '<div class="skill'+(unlocked?' unlocked':' locked')+'">'+
-      '<div class="sk-badge">'+icon(unlocked?'trophy':'lock')+'</div>'+
-      '<div class="sk-icon" style="background:var(--'+sk.color+'-bg);color:var(--'+sk.color+')">'+icon(sk.icon)+'</div>'+
-      '<div class="sk-name">'+esc(sk.name)+'</div>'+
-      '<div class="sk-desc">'+esc(sk.desc)+'</div>'+
-      '<div class="sk-track"><div class="sk-fill" style="width:'+p+'%;background:var(--'+sk.color+')"></div></div>'+
-      '<div class="sk-prog">'+Math.min(prog,sk.need)+' / '+sk.need+'</div>'+
-    '</div>';
+    '<p>Desbloqueadas pela sua constância nos treinos e estudos — '+totalUnlocked+' de '+SKILL_DEFS.length+' desbloqueadas.</p></div>';
+
+  SKILL_GROUPS.forEach(function(group){
+    var items = SKILL_DEFS.filter(function(sk){ return sk.group===group; });
+    if(!items.length) return;
+    var unlockedCount = items.filter(function(sk){ return sk.prog(state) >= sk.need; }).length;
+    html += '<div class="card"><h3 style="margin-top:0;display:flex;align-items:center;justify-content:space-between;">'+
+      '<span>'+esc(group)+'</span><span class="faint mono">'+unlockedCount+' / '+items.length+'</span></h3>'+
+      '<div class="skill-grid">';
+    items.forEach(function(sk){
+      var prog = sk.prog(state), unlocked = prog >= sk.need, p = Math.min(100, Math.round(100*prog/sk.need));
+      html += '<div class="skill'+(unlocked?' unlocked':' locked')+'">'+
+        '<div class="sk-badge">'+icon(unlocked?'trophy':'lock')+'</div>'+
+        '<div class="sk-icon" style="background:var(--'+sk.color+'-bg);color:var(--'+sk.color+')">'+icon(sk.icon)+'</div>'+
+        '<div class="sk-name">'+esc(sk.name)+'</div>'+
+        '<div class="sk-desc">'+esc(sk.desc)+'</div>'+
+        '<div class="sk-track"><div class="sk-fill" style="width:'+p+'%;background:var(--'+sk.color+')"></div></div>'+
+        '<div class="sk-prog">'+Math.min(prog,sk.need)+' / '+sk.need+'</div>'+
+      '</div>';
+    });
+    html += '</div></div>';
   });
-  html += '</div>';
   return html;
 }
 
