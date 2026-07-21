@@ -392,6 +392,7 @@ function icon(name, extra){
     send:'<path d="M4 12l16-8-6 16-3-6-7-2z"/>',
     copy:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/>',
     cloud:'<path d="M7 18a4.5 4.5 0 0 1-.4-9 5.5 5.5 0 0 1 10.6-1.7A4 4 0 0 1 17 18z"/>',
+    list:'<line x1="8" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="20" y2="12"/><line x1="8" y1="18" x2="20" y2="18"/><circle cx="4" cy="6" r="1.4"/><circle cx="4" cy="12" r="1.4"/><circle cx="4" cy="18" r="1.4"/>',
   };
   return '<svg class="'+cls+'" viewBox="0 0 24 24">'+(map[name]||'')+'</svg>';
 }
@@ -872,6 +873,7 @@ var XP = { task:15, perfectDay:25, diary:10, studyItem:20, bonusItem:15, employ:
 
 var NAV = [
   {id:'hoje', label:'Hoje', icon:'home'},
+  {id:'todo', label:'A Fazer', icon:'list'},
   {id:'estudo', label:'Estudo', icon:'book'},
   {id:'habilidades', label:'Habilidades', icon:'star'},
   {id:'diario', label:'Diário', icon:'feather'},
@@ -1093,6 +1095,7 @@ function normalizeLoadedState(loaded){
   if(!normalized.diaryAwarded) normalized.diaryAwarded = {};
   if(!normalized.monthlyXP) normalized.monthlyXP = {};
   if(!normalized.winHistory) normalized.winHistory = [];
+  if(!Array.isArray(normalized.todos)) normalized.todos = [];
   if(!normalized.employability){
     normalized.employability = DEFAULT_EMPLOYABILITY.map(function(t,i){
       return {id:'e'+i, text:t, done:false};
@@ -1374,6 +1377,7 @@ function defaultState(){
     employability: DEFAULT_EMPLOYABILITY.map(function(t,i){ return {id:'e'+i, text:t, done:false}; }),
     diary: [],
     diaryAwarded: {},
+    todos: [],
     lastPenaltyCheck: todayKey(),
     myCode: null,
     myName: '',
@@ -1676,6 +1680,28 @@ function addDiaryEntry(text){
   if(!state.diaryAwarded[key]){ state.diaryAwarded[key] = true; addXP(XP.diary); }
   afterChange();
 }
+
+/* ---- Tarefas "A Fazer" — checklist livre, sem XP ---- */
+function addTodo(text){
+  if(!text.trim()) return;
+  state.todos.push({ id:'td'+Date.now(), text:text.trim(), done:false });
+  afterChange();
+}
+function toggleTodo(id){
+  var t = state.todos.find(function(x){return x.id===id;});
+  if(!t) return;
+  t.done = !t.done;
+  afterChange();
+}
+function removeTodo(id){
+  state.todos = state.todos.filter(function(t){return t.id!==id;});
+  afterChange();
+}
+function clearDoneTodos(){
+  state.todos = state.todos.filter(function(t){return !t.done;});
+  afterChange();
+}
+
 function afterChange(){
   if(state.totalXP<0) state.totalXP = 0;
   saveState();
@@ -1767,6 +1793,7 @@ function cloudBadgeText(){
 
 function renderTab(){
   if(activeTab==='hoje') return renderHoje();
+  if(activeTab==='todo') return renderTodo();
   if(activeTab==='estudo') return renderEstudo();
   if(activeTab==='habilidades') return renderHabilidades();
   if(activeTab==='diario') return renderDiario();
@@ -1859,12 +1886,46 @@ function questRow(key, label, done, catKey, xp, delId){
     iconHtml = icon('plus');
   }
   var delBtn = delId ? '<button class="q-del" data-remove="'+delId+'">'+icon('trash')+'</button>' : '';
+  var xpLine = (xp===null || xp===undefined) ? '' : '<div class="q-xp">+'+xp+' XP</div>';
   return '<div class="quest">'+
     '<div class="checkbox'+(done?' done':'')+'" data-toggle="'+key+'"><svg viewBox="0 0 24 24"><path d="M4 12l6 6L20 6"/></svg></div>'+
     '<div class="q-icon" style="background:'+bg+';color:'+fg+'">'+iconHtml+'</div>'+
-    '<div class="q-body"><div class="q-name'+(done?' done':'')+'">'+esc(label)+'</div><div class="q-xp">+'+xp+' XP</div></div>'+
+    '<div class="q-body"><div class="q-name'+(done?' done':'')+'">'+esc(label)+'</div>'+xpLine+'</div>'+
     delBtn+
   '</div>';
+}
+
+function renderTodo(){
+  var todos = state.todos || [];
+  var doneCount = todos.filter(function(t){return t.done;}).length;
+  var html = '<div class="page-head"><span class="eyebrow">Lista livre</span><h1>A Fazer</h1>'+
+    '<p>Uma checklist simples para o que não faz parte da campanha — sem XP, só organização.</p></div>';
+
+  html += '<div class="card"><h2>'+icon('list')+' Suas tarefas'+
+    (todos.length ? ' <span class="faint mono" style="margin-left:auto;font-weight:500;">'+doneCount+' / '+todos.length+'</span>' : '')+
+    '</h2>';
+
+  if(!todos.length){
+    html += '<div class="empty">Nenhuma tarefa por aqui ainda. Adicione algo abaixo.</div>';
+  } else {
+    html += '<div class="quest-list">';
+    todos.forEach(function(t){
+      html += questRow('todo:'+t.id, t.text, t.done, null, null, t.id);
+    });
+    html += '</div>';
+  }
+
+  html += '<div class="inline-form">'+
+    '<input class="field" id="newTodoInput" placeholder="Adicionar tarefa (ex: pagar boleto, ligar pro dentista…)"/>'+
+    '<button class="btn" id="addTodoBtn">'+icon('plus')+'</button>'+
+  '</div>';
+
+  if(doneCount>0){
+    html += '<div style="margin-top:10px;"><button class="btn ghost" id="clearDoneTodosBtn">'+icon('trash')+' Limpar concluídas ('+doneCount+')</button></div>';
+  }
+
+  html += '</div>';
+  return html;
 }
 
 function renderEstudo(){
@@ -2265,10 +2326,16 @@ function bindEvents(){
       else if(parts[0]==='custom') toggleCustomTask(parts[1]);
       else if(parts[0]==='study') toggleStudyItem(parseInt(parts[1]), parseInt(parts[2]));
       else if(parts[0]==='employ') toggleEmployTask(parts[1]);
+      else if(parts[0]==='todo') toggleTodo(parts[1]);
     });
   });
   app.querySelectorAll('[data-remove]').forEach(function(el){
-    el.addEventListener('click', function(e){ e.stopPropagation(); removeCustomTask(el.getAttribute('data-remove')); });
+    el.addEventListener('click', function(e){
+      e.stopPropagation();
+      var id = el.getAttribute('data-remove');
+      if(activeTab==='todo') removeTodo(id);
+      else removeCustomTask(id);
+    });
   });
   app.querySelectorAll('[data-openphase]').forEach(function(el){
     el.addEventListener('click', function(){
@@ -2288,6 +2355,9 @@ function bindEvents(){
   bindEnter('newTaskInput', function(v){ addCustomTask(v); });
   bindClick('addEmployBtn', function(){ addEmployTask(byId('newEmployInput').value); });
   bindEnter('newEmployInput', function(v){ addEmployTask(v); });
+  bindClick('addTodoBtn', function(){ addTodo(byId('newTodoInput').value); });
+  bindEnter('newTodoInput', function(v){ addTodo(v); });
+  bindClick('clearDoneTodosBtn', clearDoneTodos);
   bindClick('diarySaveBtn', function(){ addDiaryEntry(byId('diaryInput').value); });
   bindClick('resetBtn', resetAll);
   bindClick('pomodoroStartBtn', pomodoroToggle);
