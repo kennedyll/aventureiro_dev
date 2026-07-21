@@ -139,6 +139,8 @@ svg.ic.filled{ fill:currentColor; stroke:none; }
   transition: transform .22s cubic-bezier(.2,.8,.3,1), box-shadow .22s ease;
 }
 .card:hover{ transform:translateY(-3px); box-shadow:var(--shadow-md); }
+.pomodoro-card{ transition: background .3s ease; }
+.pomodoro-card.pomodoro-break{ background:var(--leitura-bg); }
 .card h2{ font-family:'Fraunces'; font-weight:600; font-size:17px; margin:0 0 4px; display:flex; align-items:center; gap:9px; flex-wrap:wrap;}
 .card h3{ font-family:'Fraunces'; font-weight:600; font-size:15px; margin:18px 0 8px; }
 .muted{ color:var(--ink-soft); font-size:13px; }
@@ -1064,6 +1066,63 @@ var penaltyMessage = null;
 var monthlyWinMessage = null;
 var editingName = false;
 
+/* ---- Pomodoro (estado só em memória, não persiste no state salvo) ---- */
+var pomodoro = { workMin:25, breakMin:5, secondsLeft:25*60, mode:'foco', running:false, cycles:0 };
+var pomodoroTimerId = null;
+
+function pomodoroFormat(){
+  var m = Math.floor(pomodoro.secondsLeft/60), s = pomodoro.secondsLeft%60;
+  return (m<10?'0':'')+m+':'+(s<10?'0':'')+s;
+}
+function pomodoroUpdateDOM(){
+  var timeEl = byId('pomodoroTime');
+  if(!timeEl) return; // aba "hoje" não está visível agora — segue contando em segundo plano
+  timeEl.textContent = pomodoroFormat();
+  var modeEl = byId('pomodoroMode');
+  if(modeEl) modeEl.textContent = pomodoro.mode==='foco' ? 'Foco' : 'Pausa';
+  var startBtn = byId('pomodoroStartBtn');
+  if(startBtn) startBtn.textContent = pomodoro.running ? 'Pausar' : 'Iniciar';
+  var card = byId('pomodoroCard');
+  if(card) card.classList.toggle('pomodoro-break', pomodoro.mode==='pausa');
+  var cyclesEl = byId('pomodoroCycles');
+  if(cyclesEl) cyclesEl.textContent = pomodoro.cycles||0;
+}
+function pomodoroTick(){
+  if(pomodoro.secondsLeft>0){
+    pomodoro.secondsLeft--;
+  } else if(pomodoro.mode==='foco'){
+    pomodoro.cycles = (pomodoro.cycles||0)+1;
+    pomodoro.mode='pausa';
+    pomodoro.secondsLeft = pomodoro.breakMin*60;
+  } else {
+    pomodoro.mode='foco';
+    pomodoro.secondsLeft = pomodoro.workMin*60;
+  }
+  pomodoroUpdateDOM();
+}
+function pomodoroStart(){
+  if(pomodoro.running) return;
+  pomodoro.running = true;
+  pomodoroTimerId = setInterval(pomodoroTick, 1000);
+  pomodoroUpdateDOM();
+}
+function pomodoroPause(){
+  pomodoro.running = false;
+  if(pomodoroTimerId){ clearInterval(pomodoroTimerId); pomodoroTimerId = null; }
+  pomodoroUpdateDOM();
+}
+function pomodoroToggle(){ pomodoro.running ? pomodoroPause() : pomodoroStart(); }
+function pomodoroReset(){
+  pomodoroPause();
+  pomodoro.mode = 'foco';
+  pomodoro.secondsLeft = pomodoro.workMin*60;
+  pomodoroUpdateDOM();
+}
+function pomodoroSkip(){
+  pomodoro.secondsLeft = 0;
+  pomodoroTick();
+}
+
 function todayKey(){ return fmt(new Date()); }
 function fmt(d){
   var y=d.getFullYear(), m=('0'+(d.getMonth()+1)).slice(-2), day=('0'+d.getDate()).slice(-2);
@@ -1482,6 +1541,19 @@ function renderHoje(){
   if(allDone){
     html += '<div class="banner">'+icon('fire')+' Dia perfeito! Todas as missões de hoje concluídas — bônus de +'+XP.perfectDay+' XP garantido.</div>';
   }
+
+  html += '<div class="card pomodoro-card" id="pomodoroCard">'+
+    '<h2>'+icon('fire')+' Pomodoro <span class="faint mono" id="pomodoroMode" style="margin-left:auto;font-weight:500;">'+(pomodoro.mode==='foco'?'Foco':'Pausa')+'</span></h2>'+
+    '<div style="display:flex;align-items:center;gap:22px;flex-wrap:wrap;">'+
+      '<div class="mono" id="pomodoroTime" style="font-size:40px;font-weight:700;letter-spacing:0.02em;">'+pomodoroFormat()+'</div>'+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;">'+
+        '<button class="btn" id="pomodoroStartBtn">'+(pomodoro.running?'Pausar':'Iniciar')+'</button>'+
+        '<button class="btn ghost" id="pomodoroResetBtn">Reiniciar</button>'+
+        '<button class="btn ghost" id="pomodoroSkipBtn">Pular</button>'+
+      '</div>'+
+    '</div>'+
+    '<p class="faint" style="margin-top:10px;">Ciclos de foco completados hoje: <b class="mono" id="pomodoroCycles">'+(pomodoro.cycles||0)+'</b> · '+pomodoro.workMin+' min de foco / '+pomodoro.breakMin+' min de pausa</p>'+
+  '</div>';
 
   html += '<div class="card"><h2>'+icon('check2')+' Missões de hoje</h2>'+
     '<div class="rule-note">'+icon('trash')+' Missões não concluídas até o fim do dia custam <b>&nbsp;-40 XP</b></div>';
@@ -1932,6 +2004,9 @@ function bindEvents(){
   bindEnter('newEmployInput', function(v){ addEmployTask(v); });
   bindClick('diarySaveBtn', function(){ addDiaryEntry(byId('diaryInput').value); });
   bindClick('resetBtn', resetAll);
+  bindClick('pomodoroStartBtn', pomodoroToggle);
+  bindClick('pomodoroResetBtn', pomodoroReset);
+  bindClick('pomodoroSkipBtn', pomodoroSkip);
   bindClick('dismissPenalty', function(){ penaltyMessage = null; render(); });
   bindClick('dismissMonthlyWin', function(){ monthlyWinMessage = null; render(); });
 
