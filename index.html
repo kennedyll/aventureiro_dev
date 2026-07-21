@@ -6,6 +6,8 @@
 <title>Caderno de Campanha — Produtividade RPG</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 </head>
 <body style="margin:0;">
 
@@ -137,7 +139,7 @@ svg.ic.filled{ fill:currentColor; stroke:none; }
   transition: transform .22s cubic-bezier(.2,.8,.3,1), box-shadow .22s ease;
 }
 .card:hover{ transform:translateY(-3px); box-shadow:var(--shadow-md); }
-.card h2{ font-family:'Fraunces'; font-weight:600; font-size:17px; margin:0 0 4px; display:flex; align-items:center; gap:9px;}
+.card h2{ font-family:'Fraunces'; font-weight:600; font-size:17px; margin:0 0 4px; display:flex; align-items:center; gap:9px; flex-wrap:wrap;}
 .card h3{ font-family:'Fraunces'; font-weight:600; font-size:15px; margin:18px 0 8px; }
 .muted{ color:var(--ink-soft); font-size:13px; }
 .faint{ color:var(--ink-faint); font-size:12px; }
@@ -274,6 +276,7 @@ textarea.field{ min-height:90px; resize:vertical; }
 .chip{
   border:1px solid var(--line-strong); padding:7px 12px; border-radius:999px; font-size:12.5px; cursor:pointer;
   display:flex; align-items:center; gap:7px; background:var(--card-soft); transition:all .15s ease; color:var(--ink-soft);
+  font-family:inherit;
 }
 .chip:hover{ border-color:var(--ink-faint); }
 .chip.done{ background:var(--ink); color:var(--paper); border-color:var(--ink); }
@@ -301,6 +304,27 @@ textarea.field{ min-height:90px; resize:vertical; }
 
 /* --------------- diary --------------- */
 .diary-entry{ padding:12px 4px; border-bottom:1px solid var(--line); display:flex; gap:12px; }
+
+/* --------------- comunidade --------------- */
+.friend-row{
+  display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+  padding:12px 6px; border-bottom:1px solid var(--line);
+}
+.friend-row:last-child{ border-bottom:none; }
+.friend-info{ flex:1; min-width:180px; }
+.mini-chip-row{ display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
+.mini-chip{
+  display:inline-flex; align-items:center; gap:4px; font-size:10.5px; font-weight:600;
+  padding:3px 8px; border-radius:999px;
+}
+.mini-chip svg{ width:11px; height:11px; }
+.cheer-panel{ display:flex; flex-wrap:wrap; gap:7px; padding:0 6px 12px; }
+.cheer-panel .chip{ font-size:12px; }
+code.mono{ background:var(--card-soft); border:1px solid var(--line-strong); border-radius:5px; padding:1px 6px; }
+.rank-badge{
+  width:28px; height:28px; border-radius:50%; border:2px solid var(--ink-faint); flex:none;
+  display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono'; font-weight:700; font-size:12px;
+}
 .diary-entry:last-child{ border-bottom:none; }
 .diary-entry .d-icon{ width:30px; height:30px; border-radius:9px; background:var(--leitura-bg); color:var(--leitura); flex:none; display:flex; align-items:center; justify-content:center; }
 .diary-entry .d-date{ font-family:'JetBrains Mono'; font-size:10px; color:var(--ink-faint); margin-bottom:3px; }
@@ -361,6 +385,9 @@ function icon(name, extra){
     lock: '<rect x="5" y="10.5" width="14" height="9.5" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/>',
     fire: '<path d="M12 21c4 0 6.5-2.6 6.5-6 0-3-2-4.6-2.7-6.6-.5 1.7-1.5 2.6-1.5 2.6C14.8 8 13.6 5.4 11 3c.4 3-1.4 4.8-2.9 6.6C6.7 11.4 5.5 13 5.5 15c0 3.4 2.5 6 6.5 6z"/>',
     trophy:'<path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 5H5a3 3 0 0 0 3 4"/><path d="M16 5h3a3 3 0 0 1-3 4"/><path d="M10 13v3h4v-3"/><path d="M8 20h8"/><path d="M12 16v4"/>',
+    users:'<circle cx="9" cy="8" r="3.2"/><path d="M3.5 20c0-3.3 2.5-6 5.5-6s5.5 2.7 5.5 6"/><circle cx="17.5" cy="9.3" r="2.4"/><path d="M15 20c0-2.6 1.2-4.8 3.4-5.6"/>',
+    send:'<path d="M4 12l16-8-6 16-3-6-7-2z"/>',
+    copy:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/>',
   };
   return '<svg class="'+cls+'" viewBox="0 0 24 24">'+(map[name]||'')+'</svg>';
 }
@@ -844,8 +871,169 @@ var NAV = [
   {id:'estudo', label:'Estudo', icon:'book'},
   {id:'habilidades', label:'Habilidades', icon:'star'},
   {id:'diario', label:'Diário', icon:'feather'},
-  {id:'empregabilidade', label:'Carreira', icon:'briefcase'}
+  {id:'empregabilidade', label:'Carreira', icon:'briefcase'},
+  {id:'comunidade', label:'Comunidade', icon:'users'}
 ];
+
+/* ================= COMUNIDADE (Firebase — opcional) =================
+   Para ativar a aba Comunidade quando este arquivo estiver hospedado (ex: GitHub Pages):
+   1. Crie um projeto grátis em https://console.firebase.google.com
+   2. Ative o "Firestore Database" (modo produção) no menu lateral
+   3. Em Configurações do projeto > Geral > Seus apps, crie um "app da Web" e copie o objeto de config
+   4. Cole os valores abaixo, substituindo as strings vazias
+   5. Em Firestore > Regras, use algo como:
+      rules_version = '2';
+      service cloud.firestore {
+        match /databases/{database}/documents {
+          match /profiles/{code} {
+            allow read, write: if true;
+            match /cheers/{cheerId} {
+              allow read, write: if true;
+            }
+          }
+        }
+      }
+      (Regras abertas — funcionam bem entre amigos de confiança. Não use para dados sensíveis.)
+======================================================================= */
+var FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAh46O5O1Ca6y7fOQ8mJuPYKhkujVf51U0",
+  authDomain: "aventureiro-dev.firebaseapp.com",
+  projectId: "aventureiro-dev",
+  storageBucket: "aventureiro-dev.firebasestorage.app",
+  messagingSenderId: "1037588282462",
+  appId: "1:1037588282462:web:1c9a7e36267e0bea7c88cf"
+};
+
+var db = null;
+function initFirebase(){
+  if(typeof firebase === 'undefined') return false;
+  if(!FIREBASE_CONFIG.apiKey) return false;
+  try{
+    if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    db = firebase.firestore();
+    return true;
+  }catch(e){ return false; }
+}
+var firebaseReady = initFirebase();
+
+var community = { profiles:{}, cheers:[], loading:false, error:null, sendOpenFor:null, justSent:null };
+
+function genCode(){
+  var chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789', out='';
+  for(var i=0;i<6;i++){ out += chars[Math.floor(Math.random()*chars.length)]; }
+  return out;
+}
+function ensureMyCode(){
+  if(!state.myCode){ state.myCode = genCode(); saveState(); }
+  return state.myCode;
+}
+function prevMonthKey(mk){
+  var parts = mk.split('-').map(Number), y=parts[0], m=parts[1]-1;
+  if(m<1){ m=12; y--; }
+  return y+'-'+('0'+m).slice(-2);
+}
+function myPublicStats(){
+  var streaks = {};
+  Object.keys(CATS).forEach(function(k){ streaks[k] = streakFor(state,k); });
+  var mk = monthKey(), pmk = prevMonthKey(mk);
+  return {
+    name: state.myName || 'Aventureiro-Dev',
+    level: level(),
+    title: titleForLevel(level()),
+    xp: state.totalXP,
+    perfectDays: countPerfectDays(state),
+    streaks: streaks,
+    monthKey: mk,
+    monthlyXP: state.monthlyXP[mk] || 0,
+    prevMonthKey: pmk,
+    prevMonthXP: state.monthlyXP[pmk] || 0,
+    monthlyWins: state.monthlyWins || 0,
+    categoryCounts: monthlyCategoryCounts(state, mk),
+    updatedAt: Date.now()
+  };
+}
+function publishMyProfile(){
+  if(!firebaseReady || !db || !state.myName) return;
+  var code = ensureMyCode();
+  db.collection('profiles').doc(code).set(myPublicStats(), { merge:true }).catch(function(){});
+}
+async function refreshCommunity(){
+  if(!firebaseReady || !db) return;
+  community.loading = true; community.error = null; render();
+  try{
+    var myCode = ensureMyCode();
+    var jobs = state.friends.map(function(code){
+      return db.collection('profiles').doc(code).get().then(function(doc){
+        community.profiles[code] = doc.exists ? doc.data() : null;
+      }).catch(function(){ community.profiles[code] = null; });
+    });
+    var cheersJob = db.collection('profiles').doc(myCode).collection('cheers')
+      .orderBy('ts','desc').limit(12).get().then(function(qs){
+        community.cheers = qs.docs.map(function(d){ return d.data(); });
+      }).catch(function(){ community.cheers = []; });
+    await Promise.all(jobs.concat([cheersJob]));
+    checkMonthlyCrown();
+  }catch(e){
+    community.error = 'Não foi possível carregar a comunidade agora.';
+  }
+  community.loading = false;
+  render();
+}
+
+function friendXPForMonth(profile, mk){
+  if(!profile) return null;
+  if(profile.monthKey === mk) return profile.monthlyXP || 0;
+  if(profile.prevMonthKey === mk) return profile.prevMonthXP || 0;
+  return null;
+}
+
+function checkMonthlyCrown(){
+  var currentMk = monthKey();
+  if(state.lastMonthCheck === currentMk) return;
+  var endedMonth = state.lastMonthCheck;
+  var myXP = state.monthlyXP[endedMonth] || 0;
+  var best = { code:'__me__', xp: myXP };
+  state.friends.forEach(function(code){
+    var xp = friendXPForMonth(community.profiles[code], endedMonth);
+    if(xp !== null && xp > best.xp){ best = { code:code, xp:xp }; }
+  });
+  if(best.xp > 0 && best.code === '__me__'){
+    state.monthlyWins = (state.monthlyWins||0) + 1;
+    state.winHistory.unshift({ month: endedMonth, xp: myXP });
+    monthlyWinMessage = 'Você foi eleito(a) o Melhor do Mês de '+monthLabel(endedMonth)+'! 🏆';
+  }
+  state.lastMonthCheck = currentMk;
+  saveState();
+  publishMyProfile();
+}
+function addFriend(code){
+  code = (code||'').trim().toUpperCase();
+  if(!code || code.length<4) return;
+  if(code === state.myCode){ return; }
+  if(state.friends.indexOf(code)===-1){
+    state.friends.push(code);
+    saveState(); render();
+    refreshCommunity();
+  }
+}
+function removeFriend(code){
+  state.friends = state.friends.filter(function(c){ return c!==code; });
+  delete community.profiles[code];
+  saveState(); render();
+}
+var CHEER_MESSAGES = ['Continue firme! 💪','Você inspira! 🔥','Foco total, guerreiro(a)!','Cada passo conta — seguimos juntos!'];
+function sendCheer(code, message){
+  if(!firebaseReady || !db) return;
+  db.collection('profiles').doc(code).collection('cheers').add({
+    from: state.myName || 'Um(a) colega de jornada',
+    message: message,
+    ts: Date.now()
+  }).then(function(){
+    community.sendOpenFor = null;
+    community.justSent = code;
+    render();
+  }).catch(function(){});
+}
 
 /* ================= ARMAZENAMENTO (Claude Artifacts ou navegador comum) ================= */
 var hasClaudeStorage = (typeof window.storage !== 'undefined' && window.storage && typeof window.storage.get === 'function');
@@ -873,11 +1061,27 @@ var state = null;
 var activeTab = 'hoje';
 var openPhase = 0;
 var penaltyMessage = null;
+var monthlyWinMessage = null;
 
 function todayKey(){ return fmt(new Date()); }
 function fmt(d){
   var y=d.getFullYear(), m=('0'+(d.getMonth()+1)).slice(-2), day=('0'+d.getDate()).slice(-2);
   return y+'-'+m+'-'+day;
+}
+function monthKey(d){
+  d = d || new Date();
+  return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2);
+}
+var MONTH_NAMES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+function monthLabel(mk){
+  var parts = mk.split('-');
+  return MONTH_NAMES[parseInt(parts[1],10)-1]+'/'+parts[0];
+}
+function addXP(amount){
+  state.totalXP += amount;
+  var mk = monthKey();
+  state.monthlyXP[mk] = (state.monthlyXP[mk]||0) + amount;
+  if(state.monthlyXP[mk] < 0) state.monthlyXP[mk] = 0;
 }
 function defaultState(){
   return {
@@ -889,7 +1093,14 @@ function defaultState(){
     employability: DEFAULT_EMPLOYABILITY.map(function(t,i){ return {id:'e'+i, text:t, done:false}; }),
     diary: [],
     diaryAwarded: {},
-    lastPenaltyCheck: todayKey()
+    lastPenaltyCheck: todayKey(),
+    myCode: null,
+    myName: '',
+    friends: [],
+    monthlyXP: {},
+    monthlyWins: 0,
+    winHistory: [],
+    lastMonthCheck: monthKey()
   };
 }
 
@@ -917,6 +1128,11 @@ async function loadState(){
     state = defaultState();
   }
   if(!state.lastPenaltyCheck) state.lastPenaltyCheck = todayKey();
+  if(!state.monthlyXP) state.monthlyXP = {};
+  if(typeof state.monthlyWins !== 'number') state.monthlyWins = 0;
+  if(!state.winHistory) state.winHistory = [];
+  if(!state.lastMonthCheck) state.lastMonthCheck = monthKey();
+  if(!state.friends) state.friends = [];
   var penaltyResult = processMissedDays();
   if(penaltyResult.days>0){
     penaltyMessage = 'Você deixou missões incompletas em '+penaltyResult.days+' dia(s) anterior(es) — perdeu '+penaltyResult.xpLost+' XP.';
@@ -939,7 +1155,7 @@ function processMissedDays(){
     var allDone = cats.every(function(c){return log[c];}) && customIds.every(function(id){return log.custom && log.custom[id];});
     if(hasAnything && !allDone && !log.penaltyApplied){
       log.penaltyApplied = true;
-      state.totalXP -= 40;
+      addXP(-40);
       state.taskLog[key] = log;
       daysAffected++; xpLost += 40;
     }
@@ -995,6 +1211,24 @@ function countDone(s, cat){
   var n=0;
   for(var k in s.taskLog){ if(s.taskLog[k] && s.taskLog[k][cat]) n++; }
   return n;
+}
+function monthlyCategoryCounts(s, mk){
+  var counts = {};
+  Object.keys(CATS).forEach(function(k){ counts[k]=0; });
+  for(var key in s.taskLog){
+    if(key.slice(0,7) !== mk) continue;
+    var log = s.taskLog[key];
+    Object.keys(CATS).forEach(function(k){ if(log && log[k]) counts[k]++; });
+  }
+  return counts;
+}
+function bestHabitOf(counts){
+  var best = null;
+  Object.keys(CATS).forEach(function(k){
+    var v = (counts && counts[k]) || 0;
+    if(v>0 && (!best || v>best.count)){ best = { cat:k, count:v }; }
+  });
+  return best;
 }
 function phaseComplete(s, idx){
   var arr = s.javaProgress[idx];
@@ -1056,7 +1290,7 @@ function toggleCategoryTask(cat){
   var log = ensureLog(key);
   var was = !!log[cat];
   log[cat] = !was;
-  state.totalXP += was ? -XP.task : XP.task;
+  addXP(was ? -XP.task : XP.task);
   checkPerfectDay(key, log);
   afterChange();
 }
@@ -1066,7 +1300,7 @@ function toggleCustomTask(id){
   if(!log.custom) log.custom = {};
   var was = !!log.custom[id];
   log.custom[id] = !was;
-  state.totalXP += was ? -XP.task : XP.task;
+  addXP(was ? -XP.task : XP.task);
   checkPerfectDay(key, log);
   afterChange();
 }
@@ -1077,10 +1311,10 @@ function checkPerfectDay(key, log){
                 customIds.every(function(id){return log.custom && log.custom[id];});
   if(allDone && !log.perfectAwarded){
     log.perfectAwarded = true;
-    state.totalXP += XP.perfectDay;
+    addXP(XP.perfectDay);
   } else if(!allDone && log.perfectAwarded){
     log.perfectAwarded = false;
-    state.totalXP -= XP.perfectDay;
+    addXP(-XP.perfectDay);
   }
 }
 function addCustomTask(text){
@@ -1096,20 +1330,20 @@ function removeCustomTask(id){
 function toggleStudyItem(phaseIdx, itemIdx){
   var was = state.javaProgress[phaseIdx][itemIdx];
   state.javaProgress[phaseIdx][itemIdx] = !was;
-  state.totalXP += was ? -XP.studyItem : XP.studyItem;
+  addXP(was ? -XP.studyItem : XP.studyItem);
   afterChange();
 }
 function toggleBonusItem(groupIdx, itemIdx){
   var was = state.bonusProgress[groupIdx][itemIdx];
   state.bonusProgress[groupIdx][itemIdx] = !was;
-  state.totalXP += was ? -XP.bonusItem : XP.bonusItem;
+  addXP(was ? -XP.bonusItem : XP.bonusItem);
   afterChange();
 }
 function toggleEmployTask(id){
   var t = state.employability.find(function(x){return x.id===id;});
   if(!t) return;
   t.done = !t.done;
-  state.totalXP += t.done ? XP.employ : -XP.employ;
+  addXP(t.done ? XP.employ : -XP.employ);
   afterChange();
 }
 function addEmployTask(text){
@@ -1121,12 +1355,13 @@ function addDiaryEntry(text){
   if(!text.trim()) return;
   var key = todayKey();
   state.diary.unshift({ date:key, text:text.trim(), ts:Date.now() });
-  if(!state.diaryAwarded[key]){ state.diaryAwarded[key] = true; state.totalXP += XP.diary; }
+  if(!state.diaryAwarded[key]){ state.diaryAwarded[key] = true; addXP(XP.diary); }
   afterChange();
 }
 function afterChange(){
   if(state.totalXP<0) state.totalXP = 0;
   saveState();
+  publishMyProfile();
   render();
 }
 async function resetAll(){
@@ -1202,6 +1437,7 @@ function renderTab(){
   if(activeTab==='habilidades') return renderHabilidades();
   if(activeTab==='diario') return renderDiario();
   if(activeTab==='empregabilidade') return renderEmpregabilidade();
+  if(activeTab==='comunidade') return renderComunidade();
   return '';
 }
 
@@ -1236,6 +1472,9 @@ function renderHoje(){
 
   var customIds = state.customTasks.map(function(t){return t.id;});
   var allDone = cats.length+customIds.length>0 && cats.every(function(c){return log[c];}) && customIds.every(function(id){return log.custom && log.custom[id];});
+  if(monthlyWinMessage){
+    html += '<div class="banner">'+icon('trophy')+' '+esc(monthlyWinMessage)+'<button class="close" id="dismissMonthlyWin">✕</button></div>';
+  }
   if(penaltyMessage){
     html += '<div class="banner warn">'+icon('trash')+' '+esc(penaltyMessage)+'<button class="close" id="dismissPenalty">✕</button></div>';
   }
@@ -1372,6 +1611,258 @@ function renderDiario(){
   return html;
 }
 
+function streakChipsFor(streaks){
+  return Object.keys(CATS).map(function(k){
+    var c = CATS[k], v = (streaks && streaks[k]) || 0;
+    return '<span class="mini-chip" style="background:var(--'+c.color+'-bg);color:var(--'+c.color+')">'+icon(c.icon)+' '+v+'d</span>';
+  }).join('');
+}
+
+function renderRankCard(opts){
+  var html = '<div class="card"><h3 style="margin-top:0;">'+icon(opts.icon)+' '+opts.heading+'</h3>';
+  if(opts.subtitle) html += '<p class="muted">'+opts.subtitle+'</p>';
+  if(!opts.rows.length){
+    html += '<div class="empty">'+(opts.emptyText||'Nada por aqui ainda.')+'</div></div>';
+    return html;
+  }
+  html += '<div class="quest-list">';
+  opts.rows.forEach(function(r,i){
+    var pos=i+1;
+    var medal = pos===1?'var(--gold)':pos===2?'#8FA0B3':pos===3?'#B4784A':'var(--ink-faint)';
+    var medalBg = pos===1?'var(--gold-bg)':pos<=3?'var(--card-soft)':'transparent';
+    html += '<div class="friend-row">'+
+      '<div style="display:flex;align-items:center;gap:12px;">'+
+        '<div class="rank-badge" style="color:'+medal+';background:'+medalBg+';border-color:'+medal+';">'+((pos===1 && r.crown) ? icon('trophy') : pos)+'</div>'+
+        '<div class="friend-info">'+
+          '<div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;">'+
+            '<span class="q-name">'+esc(r.name)+(r.isMe?' <span class="faint">(você)</span>':'')+'</span>'+
+            (r.subLabel? '<span class="faint mono">'+r.subLabel+'</span>' : '')+
+          '</div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="mono" style="font-size:12.5px;color:var(--ink-soft);">'+r.valueText+'</div>'+
+    '</div>';
+  });
+  html += '</div></div>';
+  return html;
+}
+
+function renderRanking(){
+  var rows = [{ code:'__me__', isMe:true, data:myPublicStats() }];
+  state.friends.forEach(function(code){
+    var p = community.profiles[code];
+    if(p){ rows.push({ code:code, isMe:false, data:p }); }
+  });
+  rows.sort(function(a,b){ return (b.data.xp||0) - (a.data.xp||0); });
+  return renderRankCard({
+    icon:'trophy', heading:'Ranking da turma',
+    subtitle:'Não é sobre vencer ninguém — é só um retrato de quem está mantendo o ritmo. Use pra se inspirar, não pra se comparar.',
+    rows: rows.map(function(r){
+      return { name:r.data.name, isMe:r.isMe, subLabel:'nível '+r.data.level+' · '+esc(r.data.title), valueText:(r.data.xp||0)+' XP' };
+    })
+  });
+}
+
+function renderMonthlyRanking(){
+  var mk = monthKey();
+  var rows = [{ code:'__me__', isMe:true, data:myPublicStats() }];
+  state.friends.forEach(function(code){
+    var p = community.profiles[code];
+    var xp = friendXPForMonth(p, mk);
+    if(p && xp!==null){ rows.push({ code:code, isMe:false, data:p, xp:xp }); }
+  });
+  rows.forEach(function(r){ if(r.xp===undefined) r.xp = r.data.monthlyXP||0; });
+  rows.sort(function(a,b){ return b.xp - a.xp; });
+  return renderRankCard({
+    icon:'fire', heading:'Melhor do mês — '+monthLabel(mk)+' (em andamento)',
+    subtitle:'A apuração fecha quando o mês vira e alguém do grupo abre o app de novo. Ainda dá tempo de virar o jogo.',
+    rows: rows.map(function(r){
+      return { name:r.data.name, isMe:r.isMe, crown:true, subLabel:'nível '+r.data.level, valueText:r.xp+' XP no mês' };
+    }),
+    emptyText:'Ainda não há dados suficientes pra apurar o mês.'
+  });
+}
+
+function renderCategoryRanking(){
+  var people = [{ code:'__me__', isMe:true, data:myPublicStats() }];
+  state.friends.forEach(function(code){
+    var p = community.profiles[code];
+    if(p) people.push({ code:code, isMe:false, data:p });
+  });
+  var html = '<div class="card"><h3 style="margin-top:0;">'+icon('trophy')+' Ranking por Etapa</h3>'+
+    '<p class="muted">Quem está com a sequência mais forte em cada trilha, agora.</p>';
+  Object.keys(CATS).forEach(function(catKey){
+    var cat = CATS[catKey];
+    var rows = people.map(function(p){
+      var streak = (p.data.streaks && p.data.streaks[catKey]) || 0;
+      return { name:p.data.name, isMe:p.isMe, streak:streak };
+    }).filter(function(r){ return r.streak>0; })
+      .sort(function(a,b){ return b.streak-a.streak; });
+    html += '<h3 style="display:flex;align-items:center;gap:7px;font-size:13px;color:var(--'+cat.color+');margin:18px 0 6px;">'+icon(cat.icon)+' '+cat.label+'</h3>';
+    if(!rows.length){
+      html += '<div class="empty" style="padding:6px 0;">Ninguém em sequência ainda nessa trilha.</div>';
+    } else {
+      html += '<div class="quest-list">';
+      rows.forEach(function(r,i){
+        var pos=i+1;
+        html += '<div class="friend-row" style="padding:8px 6px;">'+
+          '<div style="display:flex;align-items:center;gap:10px;">'+
+            '<span class="faint mono" style="width:16px;">'+pos+'º</span>'+
+            '<span class="q-name" style="font-size:13px;">'+esc(r.name)+(r.isMe?' <span class="faint">(você)</span>':'')+'</span>'+
+          '</div>'+
+          '<span class="mono" style="font-size:12px;color:var(--ink-soft);">'+r.streak+' dia(s)</span>'+
+        '</div>';
+      });
+      html += '</div>';
+    }
+  });
+  html += '</div>';
+  return html;
+}
+
+function renderBestHabitMonth(){
+  var mk = monthKey();
+  var people = [{ code:'__me__', isMe:true, data:myPublicStats() }];
+  state.friends.forEach(function(code){
+    var p = community.profiles[code];
+    if(p) people.push({ code:code, isMe:false, data:p });
+  });
+  var rows = people.map(function(p){
+    var best = bestHabitOf(p.data.categoryCounts);
+    return { name:p.data.name, isMe:p.isMe, best:best };
+  }).filter(function(r){ return r.best; })
+    .sort(function(a,b){ return b.best.count - a.best.count; });
+  return renderRankCard({
+    icon:'fire', heading:'Melhor Hábito do Mês — '+monthLabel(mk),
+    subtitle:'O hábito que cada um mais praticou esse mês, olhando todas as trilhas.',
+    rows: rows.map(function(r){
+      var cat = CATS[r.best.cat];
+      return { name:r.name, isMe:r.isMe, subLabel:cat.label, valueText:r.best.count+'x este mês' };
+    }),
+    emptyText:'Ainda não há registros suficientes esse mês.'
+  });
+}
+
+function renderHallOfFame(){
+  var rows = [{ code:'__me__', isMe:true, name:state.myName||'Você', wins: state.monthlyWins||0 }];
+  state.friends.forEach(function(code){
+    var p = community.profiles[code];
+    if(p){ rows.push({ code:code, isMe:false, name:p.name, wins: p.monthlyWins||0 }); }
+  });
+  rows.sort(function(a,b){ return b.wins - a.wins; });
+  return renderRankCard({
+    icon:'star', heading:'Hall da Fama — Melhores do Mês',
+    subtitle:'Quantas vezes cada um já foi o destaque do mês na sua turma.',
+    rows: rows.map(function(r){
+      return { name:r.name, isMe:r.isMe, valueText:(r.wins===1?'1 vez':r.wins+' vezes') };
+    }),
+    emptyText:'Ninguém foi eleito o melhor do mês ainda — o próximo pode ser você.'
+  });
+}
+
+function renderComunidade(){
+  var html = '<div class="page-head"><span class="eyebrow">Jornada Compartilhada</span><h1>Comunidade</h1></div>';
+
+  if(!firebaseReady){
+    html += '<div class="card"><h2>'+icon('users')+' Configure a Comunidade</h2>'+
+      '<p class="muted">Essa aba precisa de um banco de dados gratuito (Firebase) pra funcionar entre dispositivos diferentes — algo que o GitHub Pages sozinho não oferece.</p>'+
+      '<ol style="padding-left:18px; font-size:13.5px; color:var(--ink-soft); line-height:1.9;">'+
+        '<li>Crie um projeto grátis em <b>console.firebase.google.com</b></li>'+
+        '<li>Ative o <b>Firestore Database</b> (modo produção)</li>'+
+        '<li>Em "Configurações do projeto → Seus apps", crie um app da Web e copie as chaves</li>'+
+        '<li>Cole as chaves no objeto <code class="mono">FIREBASE_CONFIG</code>, no início do arquivo HTML</li>'+
+        '<li>Configure as regras do Firestore conforme o comentário deixado no código</li>'+
+      '</ol>'+
+      '<p class="faint">Sem isso, o resto do app continua funcionando normalmente — só essa aba fica em espera.</p>'+
+    '</div>';
+    return html;
+  }
+
+  if(!state.myName){
+    html += '<div class="card"><h2>'+icon('users')+' Como você quer ser chamado?</h2>'+
+      '<p class="muted">Esse nome aparece pros seus amigos na comunidade.</p>'+
+      '<div class="inline-form"><input class="field" id="myNameInput" placeholder="Seu nome ou apelido" maxlength="24"/>'+
+      '<button class="btn" id="saveNameBtn">Salvar</button></div></div>';
+    return html;
+  }
+
+  var myCode = ensureMyCode();
+
+  html += '<div class="card">'+
+    '<h2>'+icon('send')+' Seu código de jornada</h2>'+
+    '<p class="muted">Compartilhe com quem você quer ter por perto. Quem tiver seu código pode te adicionar também.</p>'+
+    '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">'+
+      '<div class="mono" style="font-size:22px;font-weight:700;letter-spacing:0.12em;background:var(--card-soft);padding:8px 16px;border-radius:var(--radius-sm);border:1px solid var(--line-strong);">'+myCode+'</div>'+
+      '<button class="btn ghost" id="copyCodeBtn">'+icon('copy')+' Copiar</button>'+
+    '</div></div>';
+
+  html += '<div class="card"><h2>'+icon('users')+' Adicionar um companheiro</h2>'+
+    '<div class="inline-form"><input class="field" id="friendCodeInput" placeholder="Código do seu amigo (ex: A1B2C3)" maxlength="8"/>'+
+    '<button class="btn" id="addFriendBtn">Adicionar</button></div></div>';
+
+  html += '<div class="card"><h2>'+icon('users')+' Companheiros de jornada '+
+    '<button class="btn ghost" id="refreshCommunityBtn" style="margin-left:auto;font-size:11.5px;padding:6px 12px;">'+(community.loading?'Atualizando…':'Atualizar')+'</button></h2>';
+
+  if(!state.friends.length){
+    html += '<div class="empty">Você ainda não adicionou ninguém. Compartilhe seu código com um amigo ou peça o dele.</div>';
+  } else {
+    html += '<div class="quest-list">';
+    state.friends.forEach(function(code){
+      var p = community.profiles[code];
+      html += '<div class="friend-row">';
+      if(p===undefined){
+        html += '<div class="friend-info"><div class="q-name">'+code+'</div><div class="faint">Carregando…</div></div>';
+      } else if(p===null){
+        html += '<div class="friend-info"><div class="q-name">'+code+'</div><div class="faint">Perfil não encontrado.</div></div>'+
+          '<button class="q-del" data-remove-friend="'+code+'">'+icon('trash')+'</button>';
+      } else {
+        html += '<div class="friend-info">'+
+          '<div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;">'+
+            '<span class="q-name">'+esc(p.name)+'</span>'+
+            '<span class="faint mono">nível '+p.level+' · '+esc(p.title)+'</span>'+
+          '</div>'+
+          '<div class="mini-chip-row">'+streakChipsFor(p.streaks)+'</div>'+
+        '</div>'+
+        '<div style="display:flex;align-items:center;gap:6px;">'+
+          '<button class="btn ghost" data-cheer-open="'+code+'" style="font-size:11.5px;padding:7px 11px;">'+icon('send')+' Apoiar</button>'+
+          '<button class="q-del" data-remove-friend="'+code+'">'+icon('trash')+'</button>'+
+        '</div>';
+      }
+      html += '</div>';
+      if(community.sendOpenFor===code){
+        html += '<div class="cheer-panel">'+ CHEER_MESSAGES.map(function(m){
+          return '<button class="chip" data-cheer-send="'+code+'|'+esc(m)+'">'+esc(m)+'</button>';
+        }).join('') + '</div>';
+      }
+      if(community.justSent===code){
+        html += '<div class="rule-note" style="color:var(--academia);background:var(--academia-bg);">'+icon('fire')+' Apoio enviado!</div>';
+      }
+    });
+    html += '</div>';
+  }
+  if(community.error){ html += '<p class="faint" style="color:var(--danger);">'+esc(community.error)+'</p>'; }
+  html += '</div>';
+
+  html += renderMonthlyRanking();
+  html += renderBestHabitMonth();
+  html += renderCategoryRanking();
+  html += renderRanking();
+  html += renderHallOfFame();
+
+  html += '<div class="card"><h3 style="margin-top:0;">'+icon('fire')+' Apoios recebidos</h3>';
+  if(!community.cheers.length){
+    html += '<div class="empty">Ninguém te mandou um aceno ainda — tudo bem, continue no seu ritmo.</div>';
+  } else {
+    community.cheers.forEach(function(c){
+      html += '<div class="diary-entry"><div class="d-icon" style="background:var(--gold-bg);color:var(--gold);">'+icon('fire')+'</div>'+
+        '<div><div class="d-date">de '+esc(c.from)+'</div><p>'+esc(c.message)+'</p></div></div>';
+    });
+  }
+  html += '</div>';
+
+  return html;
+}
+
 function renderEmpregabilidade(){
   var html = '<div class="page-head"><span class="eyebrow">Fora do código</span><h1>Trilha de Empregabilidade</h1>'+
     '<p>Constrói sua presença profissional. Cada tarefa vale +'+XP.employ+' XP.</p></div>';
@@ -1390,7 +1881,11 @@ function renderEmpregabilidade(){
 
 function bindEvents(){
   app.querySelectorAll('[data-tab]').forEach(function(el){
-    el.addEventListener('click', function(){ activeTab = el.getAttribute('data-tab'); render(); });
+    el.addEventListener('click', function(){
+      activeTab = el.getAttribute('data-tab');
+      render();
+      if(activeTab==='comunidade' && firebaseReady && state.myName){ publishMyProfile(); refreshCommunity(); }
+    });
   });
   app.querySelectorAll('[data-toggle]').forEach(function(el){
     el.addEventListener('click', function(){
@@ -1425,6 +1920,47 @@ function bindEvents(){
   bindClick('diarySaveBtn', function(){ addDiaryEntry(byId('diaryInput').value); });
   bindClick('resetBtn', resetAll);
   bindClick('dismissPenalty', function(){ penaltyMessage = null; render(); });
+  bindClick('dismissMonthlyWin', function(){ monthlyWinMessage = null; render(); });
+
+  bindClick('saveNameBtn', function(){
+    var v = byId('myNameInput').value.trim();
+    if(!v) return;
+    state.myName = v.slice(0,24);
+    ensureMyCode();
+    saveState();
+    publishMyProfile();
+    refreshCommunity();
+    render();
+  });
+  bindEnter('myNameInput', function(v){ byId('saveNameBtn') && byId('saveNameBtn').click(); });
+
+  bindClick('copyCodeBtn', function(){
+    var code = state.myCode || '';
+    if(navigator.clipboard){ navigator.clipboard.writeText(code).catch(function(){}); }
+  });
+
+  bindClick('addFriendBtn', function(){ addFriend(byId('friendCodeInput').value); });
+  bindEnter('friendCodeInput', function(v){ addFriend(v); });
+
+  bindClick('refreshCommunityBtn', refreshCommunity);
+
+  app.querySelectorAll('[data-remove-friend]').forEach(function(el){
+    el.addEventListener('click', function(){ removeFriend(el.getAttribute('data-remove-friend')); });
+  });
+  app.querySelectorAll('[data-cheer-open]').forEach(function(el){
+    el.addEventListener('click', function(){
+      var code = el.getAttribute('data-cheer-open');
+      community.sendOpenFor = (community.sendOpenFor===code) ? null : code;
+      render();
+    });
+  });
+  app.querySelectorAll('[data-cheer-send]').forEach(function(el){
+    el.addEventListener('click', function(){
+      var parts = el.getAttribute('data-cheer-send').split('|');
+      sendCheer(parts[0], parts[1]);
+    });
+  });
+
   bind3DTilt();
 }
 
