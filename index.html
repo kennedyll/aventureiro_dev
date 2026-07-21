@@ -1062,6 +1062,7 @@ var activeTab = 'hoje';
 var openPhase = 0;
 var penaltyMessage = null;
 var monthlyWinMessage = null;
+var editingName = false;
 
 function todayKey(){ return fmt(new Date()); }
 function fmt(d){
@@ -1778,13 +1779,25 @@ function renderComunidade(){
     return html;
   }
 
-  if(!state.myName){
-    html += '<div class="card"><h2>'+icon('users')+' Como você quer ser chamado?</h2>'+
-      '<p class="muted">Esse nome aparece pros seus amigos na comunidade.</p>'+
-      '<div class="inline-form"><input class="field" id="myNameInput" placeholder="Seu nome ou apelido" maxlength="24"/>'+
-      '<button class="btn" id="saveNameBtn">Salvar</button></div></div>';
-    return html;
+  var showEditor = editingName || !state.myName;
+  var displayName = state.myName || 'Aventureiro-Dev';
+
+  html += '<div class="card"><h2>'+icon('users')+' Seu perfil</h2>'+
+    '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">'+
+      '<div class="q-name" style="font-size:16px;" id="profileNamePreview">'+esc(displayName)+'</div>'+
+      (state.myName ? '<button class="btn ghost" id="renameBtn" style="font-size:11.5px;padding:6px 12px;">'+icon('feather')+' Renomear</button>' : '')+
+    '</div>';
+
+  if(showEditor){
+    html += '<div class="inline-form" style="margin-top:10px;">'+
+      '<input class="field" id="myNameInput" placeholder="Seu nome ou apelido" maxlength="24" value="'+esc(state.myName||'')+'"/>'+
+      '<button class="btn" id="saveNameBtn">Salvar</button>'+
+      (state.myName ? '<button class="btn ghost" id="cancelNameBtn">Cancelar</button>' : '')+
+    '</div>';
   }
+  html += '<p class="muted" style="margin-top:10px;">Esse nome aparece pros seus amigos na comunidade.</p></div>';
+
+  if(!state.myName){ return html; }
 
   var myCode = ensureMyCode();
 
@@ -1926,6 +1939,7 @@ function bindEvents(){
     var v = byId('myNameInput').value.trim();
     if(!v) return;
     state.myName = v.slice(0,24);
+    editingName = false;
     ensureMyCode();
     saveState();
     publishMyProfile();
@@ -1933,6 +1947,17 @@ function bindEvents(){
     render();
   });
   bindEnter('myNameInput', function(v){ byId('saveNameBtn') && byId('saveNameBtn').click(); });
+  bindClick('renameBtn', function(){ editingName = true; render(); });
+  bindClick('cancelNameBtn', function(){ editingName = false; render(); });
+  (function(){
+    var nameInputEl = byId('myNameInput');
+    if(nameInputEl){
+      nameInputEl.addEventListener('input', function(){
+        var preview = byId('profileNamePreview');
+        if(preview) preview.textContent = nameInputEl.value.trim() || 'Aventureiro-Dev';
+      });
+    }
+  })();
 
   bindClick('copyCodeBtn', function(){
     var code = state.myCode || '';
