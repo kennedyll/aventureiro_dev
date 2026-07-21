@@ -910,6 +910,16 @@ var FIREBASE_CONFIG = {
   appId: "1:1037588282462:web:1c9a7e36267e0bea7c88cf"
 };
 
+/* Todo o progresso completo (missões, estudo, diário, nome, etc.) sincroniza
+   automaticamente em tempo real usando este identificador fixo — não é
+   necessário copiar/colar nenhum código entre navegadores ou dispositivos.
+   ATENÇÃO: como as regras do Firestore estão abertas (allow read, write: if
+   true) e este ID é o mesmo para qualquer pessoa que abra este arquivo,
+   qualquer um com o link do seu GitHub Pages acessa e edita os mesmos dados.
+   Se isso for uma preocupação, restrinja as regras do Firestore (por
+   exemplo, exigindo autenticação) ou troque o valor abaixo por algo só seu. */
+var SYNC_DOC_ID = 'minha-campanha-principal';
+
 var db = null;
 function initFirebase(){
   if(typeof firebase === 'undefined') return false;
@@ -935,14 +945,14 @@ var lastSyncedUpdatedAt = null; // último updatedAt que este dispositivo enviou
 var applyingRemote = false;     // true enquanto aplicamos um estado vindo de outro dispositivo
 
 function syncStateToFirebase(){
-  if(!firebaseReady || !db || !state || !state.myCode) return;
+  if(!firebaseReady || !db || !state) return;
   if(applyingRemote) return; // não reenvia o que acabamos de receber de outro dispositivo
   cloudSyncStatus = 'syncing';
   updateCloudBadge();
   var payload;
   try{ payload = JSON.parse(JSON.stringify(state)); }
   catch(e){ cloudSyncStatus='error'; updateCloudBadge(); return; }
-  db.collection('states').doc(state.myCode).set(payload)
+  db.collection('states').doc(SYNC_DOC_ID).set(payload)
     .then(function(){
       lastSyncedUpdatedAt = payload.updatedAt;
       cloudSyncStatus = 'synced';
@@ -955,9 +965,9 @@ function syncStateToFirebase(){
    o mesmo código recebe as mudanças automaticamente, sem precisar recarregar
    a página nem restaurar backup manualmente. ---- */
 function startCloudListener(){
-  if(!firebaseReady || !db || !state || !state.myCode) return;
+  if(!firebaseReady || !db) return;
   if(cloudUnsubscribe){ cloudUnsubscribe(); cloudUnsubscribe = null; }
-  cloudUnsubscribe = db.collection('states').doc(state.myCode)
+  cloudUnsubscribe = db.collection('states').doc(SYNC_DOC_ID)
     .onSnapshot({ includeMetadataChanges:true }, function(doc){
       if(!doc.exists) return;
       if(doc.metadata.hasPendingWrites) return; // é a nossa própria escrita ainda em trânsito — ignora
@@ -1004,41 +1014,7 @@ function updateCloudBadge(){
     el.innerHTML = icon('cloud')+' '+info.text;
   });
 }
-async function fetchCloudState(code){
-  if(!firebaseReady || !db) return null;
-  code = (code||'').trim().toUpperCase();
-  if(!code) return null;
-  try{
-    var doc = await db.collection('states').doc(code).get();
-    return doc.exists ? doc.data() : null;
-  }catch(e){ return null; }
-}
-async function restoreFromCloud(code){
-  var remote = await fetchCloudState(code);
-  if(!remote){
-    restoreMessage = { ok:false, text:'Não encontramos nenhuma campanha salva com esse código.' };
-    render();
-    return;
-  }
-  if(!confirm('Isso vai substituir o progresso atual deste dispositivo pelo backup salvo na nuvem. Continuar?')){
-    return;
-  }
-  state = Object.assign(defaultState(), remote);
-  if(!state.javaProgress || state.javaProgress.length !== STUDY_PHASES.length){
-    state.javaProgress = STUDY_PHASES.map(function(p){return p.tasks.map(function(){return false;});});
-  }
-  if(!state.bonusProgress || state.bonusProgress.length !== BONUS_TRACK.length){
-    state.bonusProgress = BONUS_TRACK.map(function(g){return g.items.map(function(){return false;});});
-  }
-  restoreMessage = { ok:true, text:'Conectado! A partir de agora este dispositivo sincroniza em tempo real com esse código.' };
-  lastSyncedUpdatedAt = state.updatedAt;
-  await saveState();
-  startCloudListener();
-  render();
-}
-
 var community = { profiles:{}, cheers:[], loading:false, error:null, sendOpenFor:null, justSent:null };
-var restoreMessage = null;
 
 function genCode(){
   var chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789', out='';
@@ -1979,24 +1955,12 @@ function renderHallOfFame(){
 }
 
 function renderCloudSyncCard(){
-  var myCode = state.myCode || '';
   var html = '<div class="card"><h2>'+icon('cloud')+' Sincronização em tempo real</h2>'+
-    '<p class="muted">Toda alteração — missões marcadas, itens de estudo, projetos, diário, nome — é enviada automaticamente para o seu banco Firebase. Qualquer navegador ou dispositivo usando o mesmo código abaixo recebe essa mudança na hora, sem precisar recarregar a página.</p>'+
+    '<p class="muted">Toda alteração — missões marcadas, itens de estudo, projetos, diário, nome — é enviada automaticamente para o seu banco Firebase. Basta abrir este mesmo arquivo em qualquer outro navegador ou dispositivo: ele já sincroniza sozinho, sem precisar copiar nenhum código.</p>'+
     '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">'+
-      '<div class="mono" style="font-size:20px;font-weight:700;letter-spacing:0.1em;background:var(--card-soft);padding:8px 16px;border-radius:var(--radius-sm);border:1px solid var(--line-strong);">'+esc(myCode)+'</div>'+
-      '<button class="btn ghost" id="copyBackupCodeBtn">'+icon('copy')+' Copiar código</button>'+
       '<span class="faint mono" id="cloudSyncBadgeCard">'+icon('cloud')+' '+cloudBadgeText()+'</span>'+
     '</div>'+
-    '<h3>Conectar outro navegador ou dispositivo</h3>'+
-    '<p class="muted">No celular, em outro navegador ou computador, abra este mesmo arquivo e cole o código acima aqui embaixo. A partir desse momento os dois ficam sincronizados em tempo real (isso substitui o progresso local deste dispositivo pelo da campanha vinculada ao código).</p>'+
-    '<div class="inline-form">'+
-      '<input class="field" id="restoreCodeInput" placeholder="Código da campanha (ex: A1B2C3)" maxlength="8"/>'+
-      '<button class="btn" id="restoreCodeBtn">Conectar</button>'+
-    '</div>';
-  if(restoreMessage){
-    html += '<div class="rule-note" style="color:'+(restoreMessage.ok?'var(--academia)':'var(--danger)')+';background:'+(restoreMessage.ok?'var(--academia-bg)':'var(--danger-bg)')+';margin-top:10px;">'+esc(restoreMessage.text)+'</div>';
-  }
-  html += '</div>';
+  '</div>';
   return html;
 }
 
@@ -2207,16 +2171,6 @@ function bindEvents(){
     var code = state.myCode || '';
     if(navigator.clipboard){ navigator.clipboard.writeText(code).catch(function(){}); }
   });
-  bindClick('copyBackupCodeBtn', function(){
-    var code = state.myCode || '';
-    if(navigator.clipboard){ navigator.clipboard.writeText(code).catch(function(){}); }
-  });
-  bindClick('restoreCodeBtn', function(){
-    var v = byId('restoreCodeInput').value;
-    restoreFromCloud(v);
-  });
-  bindEnter('restoreCodeInput', function(v){ restoreFromCloud(v); });
-
   bindClick('addFriendBtn', function(){ addFriend(byId('friendCodeInput').value); });
   bindEnter('friendCodeInput', function(v){ addFriend(v); });
 
