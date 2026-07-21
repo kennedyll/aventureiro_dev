@@ -928,31 +928,81 @@ var firebaseReady = initFirebase();
    states/{myCode}, além de ficar salva localmente. Isso serve tanto como
    backup na nuvem quanto como forma de restaurar a campanha em outro
    dispositivo, informando o código. */
-var cloudSyncStatus = 'idle'; // idle | syncing | synced | error
+var cloudSyncStatus = 'idle'; // idle | syncing | synced | listening | error
 var cloudSyncTimer = null;
+var cloudUnsubscribe = null;   // função para cancelar o listener em tempo real ativo
+var lastSyncedUpdatedAt = null; // último updatedAt que este dispositivo enviou/recebeu (evita loops)
+var applyingRemote = false;     // true enquanto aplicamos um estado vindo de outro dispositivo
 
 function syncStateToFirebase(){
   if(!firebaseReady || !db || !state || !state.myCode) return;
+  if(applyingRemote) return; // não reenvia o que acabamos de receber de outro dispositivo
   cloudSyncStatus = 'syncing';
   updateCloudBadge();
   var payload;
   try{ payload = JSON.parse(JSON.stringify(state)); }
   catch(e){ cloudSyncStatus='error'; updateCloudBadge(); return; }
   db.collection('states').doc(state.myCode).set(payload)
-    .then(function(){ cloudSyncStatus = 'synced'; updateCloudBadge(); })
+    .then(function(){
+      lastSyncedUpdatedAt = payload.updatedAt;
+      cloudSyncStatus = 'synced';
+      updateCloudBadge();
+    })
     .catch(function(){ cloudSyncStatus = 'error'; updateCloudBadge(); });
 }
+
+/* ---- Listener em tempo real: qualquer outro navegador/dispositivo usando
+   o mesmo código recebe as mudanças automaticamente, sem precisar recarregar
+   a página nem restaurar backup manualmente. ---- */
+function startCloudListener(){
+  if(!firebaseReady || !db || !state || !state.myCode) return;
+  if(cloudUnsubscribe){ cloudUnsubscribe(); cloudUnsubscribe = null; }
+  cloudUnsubscribe = db.collection('states').doc(state.myCode)
+    .onSnapshot({ includeMetadataChanges:true }, function(doc){
+      if(!doc.exists) return;
+      if(doc.metadata.hasPendingWrites) return; // é a nossa própria escrita ainda em trânsito — ignora
+      var remote = doc.data();
+      if(!remote || remote.updatedAt === lastSyncedUpdatedAt) return; // nada novo
+      lastSyncedUpdatedAt = remote.updatedAt;
+      applyRemoteState(remote);
+    }, function(){
+      cloudSyncStatus = 'error';
+      updateCloudBadge();
+    });
+}
+
+function applyRemoteState(remote){
+  applyingRemote = true;
+  state = Object.assign(defaultState(), remote);
+  if(!state.javaProgress || state.javaProgress.length !== STUDY_PHASES.length){
+    state.javaProgress = STUDY_PHASES.map(function(p){return p.tasks.map(function(){return false;});});
+  }
+  if(!state.bonusProgress || state.bonusProgress.length !== BONUS_TRACK.length){
+    state.bonusProgress = BONUS_TRACK.map(function(g){return g.items.map(function(){return false;});});
+  }
+  if(!state.friends) state.friends = [];
+  if(!state.employability) state.employability = DEFAULT_EMPLOYABILITY.map(function(t,i){ return {id:'e'+i, text:t, done:false}; });
+  // guarda localmente sem reenviar ao Firebase (já veio de lá)
+  kvSet('rpg-state-v2', JSON.stringify(state)).catch(function(){});
+  cloudSyncStatus = 'listening';
+  applyingRemote = false;
+  render();
+}
+
 function updateCloudBadge(){
-  var el = byId('cloudSyncBadge');
-  if(!el) return;
+  var badges = [byId('cloudSyncBadge'), byId('cloudSyncBadgeCard')];
   var map = {
-    idle: { text:'Nuvem desativada', cls:'' },
-    syncing: { text:'Salvando na nuvem…', cls:'' },
-    synced: { text:'Salvo na nuvem', cls:'' },
-    error: { text:'Falha ao salvar na nuvem', cls:'warn' }
+    idle: { text:'Nuvem desativada' },
+    syncing: { text:'Salvando na nuvem…' },
+    synced: { text:'Sincronizado em tempo real' },
+    listening: { text:'Atualizado agora por outro dispositivo' },
+    error: { text:'Falha ao salvar na nuvem' }
   };
   var info = map[cloudSyncStatus] || map.idle;
-  el.textContent = info.text;
+  badges.forEach(function(el){
+    if(!el) return;
+    el.innerHTML = icon('cloud')+' '+info.text;
+  });
 }
 async function fetchCloudState(code){
   if(!firebaseReady || !db) return null;
@@ -980,8 +1030,10 @@ async function restoreFromCloud(code){
   if(!state.bonusProgress || state.bonusProgress.length !== BONUS_TRACK.length){
     state.bonusProgress = BONUS_TRACK.map(function(g){return g.items.map(function(){return false;});});
   }
-  restoreMessage = { ok:true, text:'Campanha restaurada da nuvem com sucesso!' };
+  restoreMessage = { ok:true, text:'Conectado! A partir de agora este dispositivo sincroniza em tempo real com esse código.' };
+  lastSyncedUpdatedAt = state.updatedAt;
   await saveState();
+  startCloudListener();
   render();
 }
 
@@ -1270,6 +1322,7 @@ async function loadState(){
     penaltyMessage = 'Você deixou missões incompletas em '+penaltyResult.days+' dia(s) anterior(es) — perdeu '+penaltyResult.xpLost+' XP.';
   }
   saveState();
+  startCloudListener();
   render();
 }
 
@@ -1505,6 +1558,7 @@ async function resetAll(){
   state = defaultState();
   ensureMyCode();
   await saveState();
+  startCloudListener();
   render();
 }
 
@@ -1572,7 +1626,13 @@ function render(){
 }
 
 function cloudBadgeText(){
-  var map = { idle:'Nuvem desativada', syncing:'Salvando na nuvem…', synced:'Salvo na nuvem', error:'Falha ao salvar na nuvem' };
+  var map = {
+    idle:'Nuvem desativada',
+    syncing:'Salvando na nuvem…',
+    synced:'Sincronizado em tempo real',
+    listening:'Atualizado agora por outro dispositivo',
+    error:'Falha ao salvar na nuvem'
+  };
   return map[cloudSyncStatus] || map.idle;
 }
 
@@ -1920,18 +1980,18 @@ function renderHallOfFame(){
 
 function renderCloudSyncCard(){
   var myCode = state.myCode || '';
-  var html = '<div class="card"><h2>'+icon('cloud')+' Backup na nuvem</h2>'+
-    '<p class="muted">Cada alteração — missões marcadas, itens de estudo, projetos, diário, nome — é salva automaticamente no seu banco Firebase. Guarde o código abaixo para restaurar sua campanha em outro dispositivo.</p>'+
+  var html = '<div class="card"><h2>'+icon('cloud')+' Sincronização em tempo real</h2>'+
+    '<p class="muted">Toda alteração — missões marcadas, itens de estudo, projetos, diário, nome — é enviada automaticamente para o seu banco Firebase. Qualquer navegador ou dispositivo usando o mesmo código abaixo recebe essa mudança na hora, sem precisar recarregar a página.</p>'+
     '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">'+
       '<div class="mono" style="font-size:20px;font-weight:700;letter-spacing:0.1em;background:var(--card-soft);padding:8px 16px;border-radius:var(--radius-sm);border:1px solid var(--line-strong);">'+esc(myCode)+'</div>'+
       '<button class="btn ghost" id="copyBackupCodeBtn">'+icon('copy')+' Copiar código</button>'+
       '<span class="faint mono" id="cloudSyncBadgeCard">'+icon('cloud')+' '+cloudBadgeText()+'</span>'+
     '</div>'+
-    '<h3>Restaurar backup</h3>'+
-    '<p class="muted">Tem um código de outro dispositivo? Insira abaixo para trazer aquele progresso para cá (isso substitui os dados locais).</p>'+
+    '<h3>Conectar outro navegador ou dispositivo</h3>'+
+    '<p class="muted">No celular, em outro navegador ou computador, abra este mesmo arquivo e cole o código acima aqui embaixo. A partir desse momento os dois ficam sincronizados em tempo real (isso substitui o progresso local deste dispositivo pelo da campanha vinculada ao código).</p>'+
     '<div class="inline-form">'+
-      '<input class="field" id="restoreCodeInput" placeholder="Código de backup (ex: A1B2C3)" maxlength="8"/>'+
-      '<button class="btn" id="restoreCodeBtn">Restaurar</button>'+
+      '<input class="field" id="restoreCodeInput" placeholder="Código da campanha (ex: A1B2C3)" maxlength="8"/>'+
+      '<button class="btn" id="restoreCodeBtn">Conectar</button>'+
     '</div>';
   if(restoreMessage){
     html += '<div class="rule-note" style="color:'+(restoreMessage.ok?'var(--academia)':'var(--danger)')+';background:'+(restoreMessage.ok?'var(--academia-bg)':'var(--danger-bg)')+';margin-top:10px;">'+esc(restoreMessage.text)+'</div>';
