@@ -390,6 +390,7 @@ function icon(name, extra){
     users:'<circle cx="9" cy="8" r="3.2"/><path d="M3.5 20c0-3.3 2.5-6 5.5-6s5.5 2.7 5.5 6"/><circle cx="17.5" cy="9.3" r="2.4"/><path d="M15 20c0-2.6 1.2-4.8 3.4-5.6"/>',
     send:'<path d="M4 12l16-8-6 16-3-6-7-2z"/>',
     copy:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/>',
+    cloud:'<path d="M7 18a4.5 4.5 0 0 1-.4-9 5.5 5.5 0 0 1 10.6-1.7A4 4 0 0 1 17 18z"/>',
   };
   return '<svg class="'+cls+'" viewBox="0 0 24 24">'+(map[name]||'')+'</svg>';
 }
@@ -893,6 +894,9 @@ var NAV = [
               allow read, write: if true;
             }
           }
+          match /states/{code} {
+            allow read, write: if true;
+          }
         }
       }
       (Regras abertas — funcionam bem entre amigos de confiança. Não use para dados sensíveis.)
@@ -918,7 +922,71 @@ function initFirebase(){
 }
 var firebaseReady = initFirebase();
 
+/* ---- Sincronização COMPLETA do estado com o Firestore ----
+   Toda alteração de estado (marcar tarefa, concluir item de estudo/projeto,
+   registrar diário, editar nome, etc.) é gravada aqui, no documento
+   states/{myCode}, além de ficar salva localmente. Isso serve tanto como
+   backup na nuvem quanto como forma de restaurar a campanha em outro
+   dispositivo, informando o código. */
+var cloudSyncStatus = 'idle'; // idle | syncing | synced | error
+var cloudSyncTimer = null;
+
+function syncStateToFirebase(){
+  if(!firebaseReady || !db || !state || !state.myCode) return;
+  cloudSyncStatus = 'syncing';
+  updateCloudBadge();
+  var payload;
+  try{ payload = JSON.parse(JSON.stringify(state)); }
+  catch(e){ cloudSyncStatus='error'; updateCloudBadge(); return; }
+  db.collection('states').doc(state.myCode).set(payload)
+    .then(function(){ cloudSyncStatus = 'synced'; updateCloudBadge(); })
+    .catch(function(){ cloudSyncStatus = 'error'; updateCloudBadge(); });
+}
+function updateCloudBadge(){
+  var el = byId('cloudSyncBadge');
+  if(!el) return;
+  var map = {
+    idle: { text:'Nuvem desativada', cls:'' },
+    syncing: { text:'Salvando na nuvem…', cls:'' },
+    synced: { text:'Salvo na nuvem', cls:'' },
+    error: { text:'Falha ao salvar na nuvem', cls:'warn' }
+  };
+  var info = map[cloudSyncStatus] || map.idle;
+  el.textContent = info.text;
+}
+async function fetchCloudState(code){
+  if(!firebaseReady || !db) return null;
+  code = (code||'').trim().toUpperCase();
+  if(!code) return null;
+  try{
+    var doc = await db.collection('states').doc(code).get();
+    return doc.exists ? doc.data() : null;
+  }catch(e){ return null; }
+}
+async function restoreFromCloud(code){
+  var remote = await fetchCloudState(code);
+  if(!remote){
+    restoreMessage = { ok:false, text:'Não encontramos nenhuma campanha salva com esse código.' };
+    render();
+    return;
+  }
+  if(!confirm('Isso vai substituir o progresso atual deste dispositivo pelo backup salvo na nuvem. Continuar?')){
+    return;
+  }
+  state = Object.assign(defaultState(), remote);
+  if(!state.javaProgress || state.javaProgress.length !== STUDY_PHASES.length){
+    state.javaProgress = STUDY_PHASES.map(function(p){return p.tasks.map(function(){return false;});});
+  }
+  if(!state.bonusProgress || state.bonusProgress.length !== BONUS_TRACK.length){
+    state.bonusProgress = BONUS_TRACK.map(function(g){return g.items.map(function(){return false;});});
+  }
+  restoreMessage = { ok:true, text:'Campanha restaurada da nuvem com sucesso!' };
+  await saveState();
+  render();
+}
+
 var community = { profiles:{}, cheers:[], loading:false, error:null, sendOpenFor:null, justSent:null };
+var restoreMessage = null;
 
 function genCode(){
   var chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789', out='';
@@ -1160,7 +1228,8 @@ function defaultState(){
     monthlyXP: {},
     monthlyWins: 0,
     winHistory: [],
-    lastMonthCheck: monthKey()
+    lastMonthCheck: monthKey(),
+    updatedAt: Date.now()
   };
 }
 
@@ -1193,6 +1262,9 @@ async function loadState(){
   if(!state.winHistory) state.winHistory = [];
   if(!state.lastMonthCheck) state.lastMonthCheck = monthKey();
   if(!state.friends) state.friends = [];
+  // garante que exista um código de campanha desde já, para que o backup
+  // completo na nuvem funcione mesmo antes do nome ser definido
+  ensureMyCode();
   var penaltyResult = processMissedDays();
   if(penaltyResult.days>0){
     penaltyMessage = 'Você deixou missões incompletas em '+penaltyResult.days+' dia(s) anterior(es) — perdeu '+penaltyResult.xpLost+' XP.';
@@ -1228,8 +1300,12 @@ function processMissedDays(){
 }
 
 async function saveState(){
+  state.updatedAt = Date.now();
   try{ await kvSet('rpg-state-v2', JSON.stringify(state)); }
   catch(e){ /* falha silenciosa de gravação */ }
+  // toda alteração de estado (missões, projetos, diário, nome, etc.) também
+  // é enviada ao Firestore, para servir de backup/sincronização na nuvem
+  syncStateToFirebase();
 }
 
 /* ================= LÓGICA RPG ================= */
@@ -1427,6 +1503,7 @@ function afterChange(){
 async function resetAll(){
   if(!confirm('Isso apaga todo o seu progresso da campanha. Tem certeza?')) return;
   state = defaultState();
+  ensureMyCode();
   await saveState();
   render();
 }
@@ -1468,7 +1545,10 @@ function render(){
         var c = CATS[k], st = streakFor(state,k);
         return '<div class="row"><span class="dot" style="background:var(--'+c.color+')"></span>'+c.label+' <b style="margin-left:auto">'+st+'d</b></div>';
       }).join('') +'</div>'+
-      '<div class="sidebar-foot"><button class="reset-link" id="resetBtn">Reiniciar campanha</button></div>'+
+      '<div class="sidebar-foot">'+
+        (firebaseReady ? '<div class="faint mono" id="cloudSyncBadge" style="margin-bottom:8px;display:flex;align-items:center;gap:5px;">'+icon('cloud')+' '+cloudBadgeText()+'</div>' : '')+
+        '<button class="reset-link" id="resetBtn">Reiniciar campanha</button>'+
+      '</div>'+
     '</div>';
 
   var mobileTop =
@@ -1489,6 +1569,11 @@ function render(){
 
   app.innerHTML = html;
   bindEvents();
+}
+
+function cloudBadgeText(){
+  var map = { idle:'Nuvem desativada', syncing:'Salvando na nuvem…', synced:'Salvo na nuvem', error:'Falha ao salvar na nuvem' };
+  return map[cloudSyncStatus] || map.idle;
 }
 
 function renderTab(){
@@ -1833,6 +1918,28 @@ function renderHallOfFame(){
   });
 }
 
+function renderCloudSyncCard(){
+  var myCode = state.myCode || '';
+  var html = '<div class="card"><h2>'+icon('cloud')+' Backup na nuvem</h2>'+
+    '<p class="muted">Cada alteração — missões marcadas, itens de estudo, projetos, diário, nome — é salva automaticamente no seu banco Firebase. Guarde o código abaixo para restaurar sua campanha em outro dispositivo.</p>'+
+    '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">'+
+      '<div class="mono" style="font-size:20px;font-weight:700;letter-spacing:0.1em;background:var(--card-soft);padding:8px 16px;border-radius:var(--radius-sm);border:1px solid var(--line-strong);">'+esc(myCode)+'</div>'+
+      '<button class="btn ghost" id="copyBackupCodeBtn">'+icon('copy')+' Copiar código</button>'+
+      '<span class="faint mono" id="cloudSyncBadgeCard">'+icon('cloud')+' '+cloudBadgeText()+'</span>'+
+    '</div>'+
+    '<h3>Restaurar backup</h3>'+
+    '<p class="muted">Tem um código de outro dispositivo? Insira abaixo para trazer aquele progresso para cá (isso substitui os dados locais).</p>'+
+    '<div class="inline-form">'+
+      '<input class="field" id="restoreCodeInput" placeholder="Código de backup (ex: A1B2C3)" maxlength="8"/>'+
+      '<button class="btn" id="restoreCodeBtn">Restaurar</button>'+
+    '</div>';
+  if(restoreMessage){
+    html += '<div class="rule-note" style="color:'+(restoreMessage.ok?'var(--academia)':'var(--danger)')+';background:'+(restoreMessage.ok?'var(--academia-bg)':'var(--danger-bg)')+';margin-top:10px;">'+esc(restoreMessage.text)+'</div>';
+  }
+  html += '</div>';
+  return html;
+}
+
 function renderComunidade(){
   var html = '<div class="page-head"><span class="eyebrow">Jornada Compartilhada</span><h1>Comunidade</h1></div>';
 
@@ -1851,10 +1958,12 @@ function renderComunidade(){
     return html;
   }
 
+  html += renderCloudSyncCard();
+
   var showEditor = editingName || !state.myName;
   var displayName = state.myName || 'Aventureiro-Dev';
 
-  html += '<div class="card"><h2>'+icon('users')+' Seu perfil</h2>'+
+  html += '<div class="card"><h2>'+icon('users')+' Seu perfil público</h2>'+
     '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">'+
       '<div class="q-name" style="font-size:16px;" id="profileNamePreview">'+esc(displayName)+'</div>'+
       (state.myName ? '<button class="btn ghost" id="renameBtn" style="font-size:11.5px;padding:6px 12px;">'+icon('feather')+' Renomear</button>' : '')+
@@ -2038,6 +2147,15 @@ function bindEvents(){
     var code = state.myCode || '';
     if(navigator.clipboard){ navigator.clipboard.writeText(code).catch(function(){}); }
   });
+  bindClick('copyBackupCodeBtn', function(){
+    var code = state.myCode || '';
+    if(navigator.clipboard){ navigator.clipboard.writeText(code).catch(function(){}); }
+  });
+  bindClick('restoreCodeBtn', function(){
+    var v = byId('restoreCodeInput').value;
+    restoreFromCloud(v);
+  });
+  bindEnter('restoreCodeInput', function(v){ restoreFromCloud(v); });
 
   bindClick('addFriendBtn', function(){ addFriend(byId('friendCodeInput').value); });
   bindEnter('friendCodeInput', function(v){ addFriend(v); });
