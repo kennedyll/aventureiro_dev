@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <title>Caderno de Campanha — Produtividade RPG</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
@@ -944,59 +945,178 @@ var cloudUnsubscribe = null;   // função para cancelar o listener em tempo rea
 var lastSyncedUpdatedAt = null; // último updatedAt que este dispositivo enviou/recebeu (evita loops)
 var applyingRemote = false;     // true enquanto aplicamos um estado vindo de outro dispositivo
 
+/* Converte matrizes (arrays dentro de arrays) em mapas compatíveis com o
+   Firestore. O Firestore não aceita arrays diretamente aninhados. */
+function matrixToFirestoreMap(matrix){
+  var out = {};
+  (matrix || []).forEach(function(row, rowIndex){
+    var rowMap = {};
+    (row || []).forEach(function(value, colIndex){
+      rowMap[String(colIndex)] = !!value;
+    });
+    out[String(rowIndex)] = rowMap;
+  });
+  return out;
+}
+
+function firestoreMapToMatrix(map, definitions){
+  return definitions.map(function(definition, rowIndex){
+    var row = map && map[String(rowIndex)] ? map[String(rowIndex)] : {};
+    var itemCount = definition.tasks ? definition.tasks.length : definition.items.length;
+    var values = [];
+    for(var colIndex=0; colIndex<itemCount; colIndex++){
+      values.push(!!row[String(colIndex)]);
+    }
+    return values;
+  });
+}
+
+function encodeStateForFirestore(sourceState){
+  var payload = JSON.parse(JSON.stringify(sourceState));
+  payload.javaProgress = matrixToFirestoreMap(sourceState.javaProgress);
+  payload.bonusProgress = matrixToFirestoreMap(sourceState.bonusProgress);
+  payload.cloudSchemaVersion = 2;
+  return payload;
+}
+
+function decodeStateFromFirestore(payload){
+  var decoded = JSON.parse(JSON.stringify(payload || {}));
+
+  // Formato novo: mapas. Formato antigo/local: matrizes.
+  if(decoded.javaProgress && !Array.isArray(decoded.javaProgress)){
+    decoded.javaProgress = firestoreMapToMatrix(decoded.javaProgress, STUDY_PHASES);
+  }
+  if(decoded.bonusProgress && !Array.isArray(decoded.bonusProgress)){
+    decoded.bonusProgress = firestoreMapToMatrix(decoded.bonusProgress, BONUS_TRACK);
+  }
+
+  return decoded;
+}
+
+/* A gravação é agrupada por alguns milissegundos. Assim, várias mudanças
+   rápidas não geram dezenas de operações simultâneas no Firestore. */
 function syncStateToFirebase(){
-  if(!firebaseReady || !db || !state) return;
-  if(applyingRemote) return; // não reenvia o que acabamos de receber de outro dispositivo
+  if(!firebaseReady || !db || !state || applyingRemote) return;
+
   cloudSyncStatus = 'syncing';
   updateCloudBadge();
+
+  if(cloudSyncTimer) clearTimeout(cloudSyncTimer);
+  cloudSyncTimer = setTimeout(syncStateToFirebaseNow, 350);
+}
+
+function syncStateToFirebaseNow(){
+  if(!firebaseReady || !db || !state || applyingRemote) return;
+
   var payload;
-  try{ payload = JSON.parse(JSON.stringify(state)); }
-  catch(e){ cloudSyncStatus='error'; updateCloudBadge(); return; }
+  try{
+    payload = encodeStateForFirestore(state);
+  }catch(e){
+    console.error('Falha ao preparar os dados para sincronização:', e);
+    cloudSyncStatus = 'error';
+    updateCloudBadge();
+    return;
+  }
+
   db.collection('states').doc(SYNC_DOC_ID).set(payload)
     .then(function(){
-      lastSyncedUpdatedAt = payload.updatedAt;
+      lastSyncedUpdatedAt = payload.updatedAt || null;
       cloudSyncStatus = 'synced';
       updateCloudBadge();
     })
-    .catch(function(){ cloudSyncStatus = 'error'; updateCloudBadge(); });
-}
-
-/* ---- Listener em tempo real: qualquer outro navegador/dispositivo usando
-   o mesmo código recebe as mudanças automaticamente, sem precisar recarregar
-   a página nem restaurar backup manualmente. ---- */
-function startCloudListener(){
-  if(!firebaseReady || !db) return;
-  if(cloudUnsubscribe){ cloudUnsubscribe(); cloudUnsubscribe = null; }
-  cloudUnsubscribe = db.collection('states').doc(SYNC_DOC_ID)
-    .onSnapshot({ includeMetadataChanges:true }, function(doc){
-      if(!doc.exists) return;
-      if(doc.metadata.hasPendingWrites) return; // é a nossa própria escrita ainda em trânsito — ignora
-      var remote = doc.data();
-      if(!remote || remote.updatedAt === lastSyncedUpdatedAt) return; // nada novo
-      lastSyncedUpdatedAt = remote.updatedAt;
-      applyRemoteState(remote);
-    }, function(){
+    .catch(function(error){
+      console.error('Falha ao salvar no Firestore:', error);
       cloudSyncStatus = 'error';
       updateCloudBadge();
     });
 }
 
+/* Listener em tempo real. Toda alteração feita em outro navegador ou
+   dispositivo é aplicada automaticamente quando for mais recente. */
+function startCloudListener(){
+  if(!firebaseReady || !db) return;
+
+  if(cloudUnsubscribe){
+    cloudUnsubscribe();
+    cloudUnsubscribe = null;
+  }
+
+  cloudUnsubscribe = db.collection('states').doc(SYNC_DOC_ID)
+    .onSnapshot({ includeMetadataChanges:true }, function(doc){
+      if(!doc.exists) return;
+      if(doc.metadata.hasPendingWrites) return;
+
+      var remote = decodeStateFromFirestore(doc.data());
+      if(!remote) return;
+
+      var remoteUpdatedAt = Number(remote.updatedAt || 0);
+      var localUpdatedAt = Number((state && state.updatedAt) || 0);
+
+      if(remoteUpdatedAt <= localUpdatedAt) return;
+
+      lastSyncedUpdatedAt = remoteUpdatedAt;
+      applyRemoteState(remote);
+    }, function(error){
+      console.error('Falha no listener do Firestore:', error);
+      cloudSyncStatus = 'error';
+      updateCloudBadge();
+    });
+}
+
+function normalizeLoadedState(loaded){
+  var normalized = Object.assign(defaultState(), loaded || {});
+
+  if(!Array.isArray(normalized.javaProgress) ||
+     normalized.javaProgress.length !== STUDY_PHASES.length){
+    normalized.javaProgress = STUDY_PHASES.map(function(phase, phaseIndex){
+      var existing = Array.isArray(normalized.javaProgress) ? normalized.javaProgress[phaseIndex] : null;
+      return phase.tasks.map(function(_, itemIndex){
+        return !!(existing && existing[itemIndex]);
+      });
+    });
+  }
+
+  if(!Array.isArray(normalized.bonusProgress) ||
+     normalized.bonusProgress.length !== BONUS_TRACK.length){
+    normalized.bonusProgress = BONUS_TRACK.map(function(group, groupIndex){
+      var existing = Array.isArray(normalized.bonusProgress) ? normalized.bonusProgress[groupIndex] : null;
+      return group.items.map(function(_, itemIndex){
+        return !!(existing && existing[itemIndex]);
+      });
+    });
+  }
+
+  if(!normalized.taskLog) normalized.taskLog = {};
+  if(!normalized.customTasks) normalized.customTasks = [];
+  if(!normalized.friends) normalized.friends = [];
+  if(!normalized.diary) normalized.diary = [];
+  if(!normalized.diaryAwarded) normalized.diaryAwarded = {};
+  if(!normalized.monthlyXP) normalized.monthlyXP = {};
+  if(!normalized.winHistory) normalized.winHistory = [];
+  if(!normalized.employability){
+    normalized.employability = DEFAULT_EMPLOYABILITY.map(function(t,i){
+      return {id:'e'+i, text:t, done:false};
+    });
+  }
+
+  return normalized;
+}
+
 function applyRemoteState(remote){
   applyingRemote = true;
-  state = Object.assign(defaultState(), remote);
-  if(!state.javaProgress || state.javaProgress.length !== STUDY_PHASES.length){
-    state.javaProgress = STUDY_PHASES.map(function(p){return p.tasks.map(function(){return false;});});
+
+  try{
+    state = normalizeLoadedState(decodeStateFromFirestore(remote));
+    lastSyncedUpdatedAt = Number(state.updatedAt || 0);
+
+    // Salva localmente sem reenviar, pois esse estado já veio da nuvem.
+    kvSet('rpg-state-v2', JSON.stringify(state)).catch(function(){});
+
+    cloudSyncStatus = 'listening';
+    render();
+  }finally{
+    applyingRemote = false;
   }
-  if(!state.bonusProgress || state.bonusProgress.length !== BONUS_TRACK.length){
-    state.bonusProgress = BONUS_TRACK.map(function(g){return g.items.map(function(){return false;});});
-  }
-  if(!state.friends) state.friends = [];
-  if(!state.employability) state.employability = DEFAULT_EMPLOYABILITY.map(function(t,i){ return {id:'e'+i, text:t, done:false}; });
-  // guarda localmente sem reenviar ao Firebase (já veio de lá)
-  kvSet('rpg-state-v2', JSON.stringify(state)).catch(function(){});
-  cloudSyncStatus = 'listening';
-  applyingRemote = false;
-  render();
 }
 
 function updateCloudBadge(){
@@ -1021,8 +1141,13 @@ function genCode(){
   for(var i=0;i<6;i++){ out += chars[Math.floor(Math.random()*chars.length)]; }
   return out;
 }
-function ensureMyCode(){
-  if(!state.myCode){ state.myCode = genCode(); saveState(); }
+function ensureMyCode(persist){
+  if(!state.myCode){
+    state.myCode = genCode();
+    // Durante a inicialização, persist=false evita sobrescrever a nuvem
+    // antes de comparar qual versão é a mais recente.
+    if(persist !== false) saveState();
+  }
   return state.myCode;
 }
 function prevMonthKey(mk){
@@ -1265,39 +1390,67 @@ async function loadState(){
   try{
     var r = await kvGet('rpg-state-v2');
     if(r && r.value){
-      var loaded = JSON.parse(r.value);
-      state = Object.assign(defaultState(), loaded);
-      if(!state.javaProgress || state.javaProgress.length !== STUDY_PHASES.length){
-        state.javaProgress = STUDY_PHASES.map(function(p){return p.tasks.map(function(){return false;});});
-      }
-      if(!state.bonusProgress || state.bonusProgress.length !== BONUS_TRACK.length){
-        state.bonusProgress = BONUS_TRACK.map(function(g){return g.items.map(function(){return false;});});
-      }
+      state = normalizeLoadedState(JSON.parse(r.value));
     } else {
-      // tenta migrar de uma versão anterior, se existir
       try{
         var old = await kvGet('rpg-state-v1');
-        if(old && old.value){ state = Object.assign(defaultState(), JSON.parse(old.value)); }
-        else { state = defaultState(); }
-      }catch(e2){ state = defaultState(); }
+        state = old && old.value
+          ? normalizeLoadedState(JSON.parse(old.value))
+          : defaultState();
+      }catch(e2){
+        state = defaultState();
+      }
     }
   }catch(e){
     state = defaultState();
   }
+
   if(!state.lastPenaltyCheck) state.lastPenaltyCheck = todayKey();
-  if(!state.monthlyXP) state.monthlyXP = {};
-  if(typeof state.monthlyWins !== 'number') state.monthlyWins = 0;
-  if(!state.winHistory) state.winHistory = [];
   if(!state.lastMonthCheck) state.lastMonthCheck = monthKey();
-  if(!state.friends) state.friends = [];
-  // garante que exista um código de campanha desde já, para que o backup
-  // completo na nuvem funcione mesmo antes do nome ser definido
-  ensureMyCode();
+
+  // Não grava ainda: primeiro comparamos o estado local com o estado na nuvem.
+  ensureMyCode(false);
+
   var penaltyResult = processMissedDays();
   if(penaltyResult.days>0){
     penaltyMessage = 'Você deixou missões incompletas em '+penaltyResult.days+' dia(s) anterior(es) — perdeu '+penaltyResult.xpLost+' XP.';
+    state.updatedAt = Date.now();
   }
-  saveState();
+
+  // Mostra imediatamente a versão local enquanto a nuvem é consultada.
+  render();
+
+  if(!firebaseReady || !db){
+    await saveState();
+    return;
+  }
+
+  cloudSyncStatus = 'syncing';
+  updateCloudBadge();
+
+  try{
+    var doc = await db.collection('states').doc(SYNC_DOC_ID).get();
+
+    if(doc.exists){
+      var remote = normalizeLoadedState(decodeStateFromFirestore(doc.data()));
+      var remoteUpdatedAt = Number(remote.updatedAt || 0);
+      var localUpdatedAt = Number(state.updatedAt || 0);
+
+      if(remoteUpdatedAt > localUpdatedAt){
+        applyRemoteState(remote);
+      }else{
+        await saveState();
+      }
+    }else{
+      await saveState();
+    }
+  }catch(error){
+    console.error('Não foi possível carregar o estado da nuvem:', error);
+    cloudSyncStatus = 'error';
+    updateCloudBadge();
+    await kvSet('rpg-state-v2', JSON.stringify(state));
+  }
+
   startCloudListener();
   render();
 }
