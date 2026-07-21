@@ -1898,8 +1898,7 @@ function questRow(key, label, done, catKey, xp, delId){
 function renderTodo(){
   var todos = state.todos || [];
   var doneCount = todos.filter(function(t){return t.done;}).length;
-  var html = '<div class="page-head"><span class="eyebrow">Lista livre</span><h1>A Fazer</h1>'+
-    '<p>Uma checklist simples para o que não faz parte da campanha — sem XP, só organização.</p></div>';
+  var html = '<div class="page-head"><span class="eyebrow">Lista livre</span><h1>A Fazer</h1></div>';
 
   html += '<div class="card"><h2>'+icon('list')+' Suas tarefas'+
     (todos.length ? ' <span class="faint mono" style="margin-left:auto;font-weight:500;">'+doneCount+' / '+todos.length+'</span>' : '')+
