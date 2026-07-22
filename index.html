@@ -46,6 +46,7 @@ body{
   overflow:hidden;
   display:flex; align-items:center; justify-content:center;
   padding:26px;
+  -webkit-tap-highlight-color:transparent;
 }
 .rpg-root{
   font-family:'Inter', system-ui, sans-serif;
@@ -200,12 +201,13 @@ svg.ic.filled{ fill:currentColor; stroke:none; }
 .empty{ font-size:13px; color:var(--ink-faint); font-style:italic; padding:14px 4px; text-align:center; }
 
 /* forms */
-.inline-form{ display:flex; gap:8px; margin-top:14px; }
+.inline-form{ display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; }
 input.field, textarea.field{
   font-family:'Inter'; font-size:13.5px; padding:10px 12px; border:1px solid var(--line-strong);
   border-radius:var(--radius-sm); background:var(--card-soft); color:var(--ink); width:100%;
   transition:border-color .15s ease, box-shadow .15s ease;
 }
+input.field{ flex:1 1 160px; min-width:0; }
 input.field:focus, textarea.field:focus{ outline:none; border-color:var(--ink-soft); box-shadow:0 0 0 3px rgba(30,45,61,0.08); }
 textarea.field{ min-height:90px; resize:vertical; }
 .btn{
@@ -258,6 +260,7 @@ textarea.field{ min-height:90px; resize:vertical; }
 .phase-head{
   display:flex; align-items:center; gap:12px; padding:12px 14px; cursor:pointer; border-radius:var(--radius-sm);
   border:1px solid var(--line-strong); background:var(--card-soft); transition:background .15s ease;
+  flex-wrap:wrap;
 }
 .phase-head:hover{ background:var(--card); }
 .phase-title{ font-family:'Fraunces'; font-weight:600; font-size:15px; flex:1; }
@@ -354,10 +357,35 @@ code.mono{ background:var(--card-soft); border:1px solid var(--line-strong); bor
   }
   .mobile-nav button{
     flex:1; background:none; border:none; display:flex; flex-direction:column; align-items:center; gap:3px;
-    padding:6px 2px; color:var(--ink-faint); font-size:9.5px; font-weight:600; cursor:pointer;
+    padding:7px 2px; color:var(--ink-faint); font-size:9.5px; font-weight:600; cursor:pointer;
+    min-height:44px; justify-content:center;
   }
   .mobile-nav button.active{ color:var(--ink); }
-  .hero{ flex-direction:column; align-items:flex-start; }
+  .hero{ flex-direction:column; align-items:flex-start; padding:18px; }
+  .card{ padding:16px; }
+  .page-head h1{ font-size:21px; }
+  .page-head p{ max-width:none; }
+  .checkbox{ width:26px; height:26px; }
+  .btn{ padding:11px 16px; }
+  .inline-form{ flex-direction:column; }
+  .inline-form .btn{ width:100%; }
+  .skill-grid{ grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:10px; }
+  .friend-row{ align-items:flex-start; }
+  #pomodoroTime{ font-size:34px !important; }
+  .phase{ margin-bottom:6px; }
+  .phase-head{ padding:11px 12px; }
+  .timeline{ padding-left:32px; }
+  .phase-node{ left:-32px; width:28px; height:28px; font-size:11px; }
+}
+
+@media (max-width:420px){
+  .main{ padding:14px 12px 88px; }
+  .card{ padding:14px; }
+  .page-head h1{ font-size:19px; }
+  .hero-ring{ width:80px; height:80px; }
+  .hero-ring .lvl b{ font-size:26px; }
+  .rank-badge{ width:24px; height:24px; font-size:11px; }
+  .mono#pomodoroTime, #pomodoroTime{ font-size:30px !important; }
 }
 </style>
 
@@ -887,22 +915,9 @@ var NAV = [
    2. Ative o "Firestore Database" (modo produção) no menu lateral
    3. Em Configurações do projeto > Geral > Seus apps, crie um "app da Web" e copie o objeto de config
    4. Cole os valores abaixo, substituindo as strings vazias
-   5. Em Firestore > Regras, use algo como:
-      rules_version = '2';
-      service cloud.firestore {
-        match /databases/{database}/documents {
-          match /profiles/{code} {
-            allow read, write: if true;
-            match /cheers/{cheerId} {
-              allow read, write: if true;
-            }
-          }
-          match /states/{code} {
-            allow read, write: if true;
-          }
-        }
-      }
-      (Regras abertas — funcionam bem entre amigos de confiança. Não use para dados sensíveis.)
+   5. Em Firestore > Regras, use o conteúdo do arquivo firestore.rules (gerado junto com este HTML),
+      que restringe a escrita do seu documento de estado ao SYNC_DOC_ID abaixo — assim ninguém além
+      de quem conhece esse ID consegue sobrescrever seu progresso.
 ======================================================================= */
 var FIREBASE_CONFIG = {
   apiKey: "AIzaSyAh46O5O1Ca6y7fOQ8mJuPYKhkujVf51U0",
@@ -916,12 +931,12 @@ var FIREBASE_CONFIG = {
 /* Todo o progresso completo (missões, estudo, diário, nome, etc.) sincroniza
    automaticamente em tempo real usando este identificador fixo — não é
    necessário copiar/colar nenhum código entre navegadores ou dispositivos.
-   ATENÇÃO: como as regras do Firestore estão abertas (allow read, write: if
-   true) e este ID é o mesmo para qualquer pessoa que abra este arquivo,
-   qualquer um com o link do seu GitHub Pages acessa e edita os mesmos dados.
-   Se isso for uma preocupação, restrinja as regras do Firestore (por
-   exemplo, exigindo autenticação) ou troque o valor abaixo por algo só seu. */
-var SYNC_DOC_ID = 'minha-campanha-principal';
+   Este ID foi trocado por um valor longo e aleatório (em vez de um texto
+   previsível) para funcionar como um segredo de fato: mesmo com as regras
+   do Firestore restringindo a escrita a exatamente este ID (veja
+   firestore.rules), só quem tem este arquivo consegue gravar neste
+   documento. Se quiser, troque por outro valor só seu. */
+var SYNC_DOC_ID = 'd123c1142f4c9da37cb4a2b930f1a3da';
 
 var db = null;
 function initFirebase(){
@@ -1386,7 +1401,15 @@ function defaultState(){
     monthlyWins: 0,
     winHistory: [],
     lastMonthCheck: monthKey(),
-    updatedAt: Date.now()
+    /* IMPORTANTE: updatedAt começa em 0 (e não Date.now()) de propósito.
+       Um estado padrão/vazio precisa SEMPRE parecer mais "antigo" do que
+       qualquer estado real salvo na nuvem. Se aqui fosse Date.now(), toda
+       vez que o app abrisse sem dado local (outro navegador, cache limpo,
+       modo anônimo, um bot visitando a página) ele acharia que o estado
+       vazio é "mais novo" que o progresso real salvo no Firestore e
+       sobrescreveria a nuvem com dados em branco — foi exatamente isso
+       que causou a perda de progresso. */
+    updatedAt: 0
   };
 }
 
@@ -1711,6 +1734,7 @@ function afterChange(){
 async function resetAll(){
   if(!confirm('Isso apaga todo o seu progresso da campanha. Tem certeza?')) return;
   state = defaultState();
+  state.updatedAt = Date.now();
   ensureMyCode();
   await saveState();
   startCloudListener();
@@ -2188,7 +2212,7 @@ function renderComunidade(){
         '<li>Ative o <b>Firestore Database</b> (modo produção)</li>'+
         '<li>Em "Configurações do projeto → Seus apps", crie um app da Web e copie as chaves</li>'+
         '<li>Cole as chaves no objeto <code class="mono">FIREBASE_CONFIG</code>, no início do arquivo HTML</li>'+
-        '<li>Configure as regras do Firestore conforme o comentário deixado no código</li>'+
+        '<li>Configure as regras do Firestore conforme o arquivo firestore.rules</li>'+
       '</ol>'+
       '<p class="faint">Sem isso, o resto do app continua funcionando normalmente — só essa aba fica em espera.</p>'+
     '</div>';
