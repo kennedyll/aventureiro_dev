@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <title>Caderno de Campanha — Produtividade RPG</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -311,26 +311,7 @@ textarea.field{ min-height:90px; resize:vertical; }
 /* --------------- diary --------------- */
 .diary-entry{ padding:12px 4px; border-bottom:1px solid var(--line); display:flex; gap:12px; }
 
-/* --------------- comunidade --------------- */
-.friend-row{
-  display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
-  padding:12px 6px; border-bottom:1px solid var(--line);
-}
-.friend-row:last-child{ border-bottom:none; }
-.friend-info{ flex:1; min-width:180px; }
-.mini-chip-row{ display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
-.mini-chip{
-  display:inline-flex; align-items:center; gap:4px; font-size:10.5px; font-weight:600;
-  padding:3px 8px; border-radius:999px;
-}
-.mini-chip svg{ width:11px; height:11px; }
-.cheer-panel{ display:flex; flex-wrap:wrap; gap:7px; padding:0 6px 12px; }
-.cheer-panel .chip{ font-size:12px; }
 code.mono{ background:var(--card-soft); border:1px solid var(--line-strong); border-radius:5px; padding:1px 6px; }
-.rank-badge{
-  width:28px; height:28px; border-radius:50%; border:2px solid var(--ink-faint); flex:none;
-  display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono'; font-weight:700; font-size:12px;
-}
 .diary-entry:last-child{ border-bottom:none; }
 .diary-entry .d-icon{ width:30px; height:30px; border-radius:9px; background:var(--leitura-bg); color:var(--leitura); flex:none; display:flex; align-items:center; justify-content:center; }
 .diary-entry .d-date{ font-family:'JetBrains Mono'; font-size:10px; color:var(--ink-faint); margin-bottom:3px; }
@@ -387,6 +368,288 @@ code.mono{ background:var(--card-soft); border:1px solid var(--line-strong); bor
   .rank-badge{ width:24px; height:24px; font-size:11px; }
   .mono#pomodoroTime, #pomodoroTime{ font-size:30px !important; }
 }
+
+/* =========================================================
+   RESPONSIVIDADE APRIMORADA — celular, tablet e modo paisagem
+   ========================================================= */
+html{
+  width:100%;
+  min-height:100%;
+  text-size-adjust:100%;
+  -webkit-text-size-adjust:100%;
+}
+body{ min-height:100dvh; }
+.rpg-root{ min-height:0; }
+.shell,.main{ width:100%; }
+
+.card,.hero,.quest,.friend-row,.phase-head,.project-note,.banner,.rule-note{ min-width:0; }
+.q-name,.sk-name,.sk-desc,.page-head p,.hero-info .title,.hero-info .xp,.project-note span,.diary-entry p,.friend-info{
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
+
+@media (max-width:1100px){
+  body{ padding:14px; }
+  .rpg-root{
+    max-width:none;
+    max-height:none;
+    height:calc(100dvh - 28px);
+    border-radius:20px;
+  }
+  .sidebar{ width:196px; padding:18px 12px; gap:18px; }
+  .main{ max-width:none; padding:24px 24px 72px; }
+  .skill-grid{ grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); }
+}
+
+@media (max-width:860px){
+  html,body{
+    width:100%;
+    height:100%;
+    min-height:100dvh;
+    overflow:hidden;
+  }
+  body{
+    display:block;
+    padding:0;
+    background:var(--paper);
+  }
+  .rpg-root{
+    width:100%;
+    height:100dvh;
+    min-height:100dvh;
+    max-width:none;
+    max-height:none;
+    border-radius:0;
+    box-shadow:none;
+    overflow-y:auto;
+    overscroll-behavior-y:contain;
+    padding-bottom:0;
+  }
+  .shell{ min-height:100%; display:block; }
+  .main{
+    width:100%;
+    max-width:none;
+    padding:16px 14px calc(98px + env(safe-area-inset-bottom));
+  }
+  .mobile-top{
+    top:0;
+    margin:-16px -14px 18px;
+    padding:calc(12px + env(safe-area-inset-top)) 14px 12px;
+    background:rgba(242,247,252,.94);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+  }
+  .mobile-top .brand{ min-width:0; }
+  .mobile-top .brand .name{
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    max-width:calc(100vw - 110px);
+  }
+  .mobile-nav{
+    left:0;
+    right:0;
+    bottom:0;
+    width:100%;
+    overflow-x:auto;
+    overflow-y:hidden;
+    justify-content:flex-start;
+    gap:2px;
+    padding:6px 6px calc(6px + env(safe-area-inset-bottom));
+    background:rgba(255,255,255,.96);
+    backdrop-filter:blur(16px);
+    -webkit-backdrop-filter:blur(16px);
+    scrollbar-width:none;
+  }
+  .mobile-nav::-webkit-scrollbar{ display:none; }
+  .mobile-nav button{
+    flex:0 0 68px;
+    min-width:68px;
+    min-height:50px;
+    padding:6px 4px;
+    border-radius:10px;
+  }
+  .mobile-nav button.active{
+    color:var(--ink);
+    background:var(--card-soft);
+  }
+  .page-head{ margin-bottom:16px; }
+  .page-head h1{
+    font-size:clamp(20px,6vw,25px);
+    line-height:1.14;
+  }
+  .page-head p{
+    font-size:13px;
+    line-height:1.5;
+  }
+  .hero{
+    display:grid;
+    grid-template-columns:auto minmax(0,1fr);
+    align-items:center;
+    gap:16px;
+    padding:16px;
+  }
+  .hero-ring{ width:82px; height:82px; }
+  .hero-info{ min-width:0; }
+  .hero-info .title{ font-size:16px; }
+  .hero-info .xp{ line-height:1.45; }
+  .streak-chips{ grid-column:1 / -1; width:100%; }
+  .streak-chip{ max-width:100%; }
+  .card{
+    padding:16px;
+    margin-bottom:12px;
+    border-radius:14px;
+  }
+  .card:hover,.hero:hover,.skill:hover,.level-card:hover{ transform:none; }
+  .card h2{ font-size:16px; line-height:1.3; }
+  .quest{ gap:10px; padding:12px 2px; }
+  .q-icon{ width:34px; height:34px; }
+  .q-del{
+    opacity:1;
+    min-width:38px;
+    min-height:38px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .inline-form{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    align-items:stretch;
+    gap:8px;
+  }
+  .inline-form .field{ min-width:0; }
+  .inline-form .btn{ width:auto; min-width:48px; }
+  textarea.field{ min-height:120px; }
+  .phase-head{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto auto;
+    gap:6px 10px;
+  }
+  .phase-title{ grid-column:1; }
+  .phase-dur{ grid-column:1 / -1; grid-row:2; }
+  .phase-pct{ grid-column:2; grid-row:1; }
+  .chevron{ grid-column:3; grid-row:1; }
+  .phase-body.open{ max-height:1600px; }
+  .chip-list{ gap:7px; }
+  .chip{
+    white-space:normal;
+    line-height:1.35;
+    text-align:left;
+  }
+  .skill-grid{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .skill{ padding:14px; }
+  .diary-entry{ align-items:flex-start; }
+  .friend-row{
+    flex-direction:column;
+    align-items:stretch;
+  }
+  .friend-row > div:last-child{ align-self:flex-end; }
+}
+
+@media (max-width:520px){
+  .main{ padding-left:10px; padding-right:10px; }
+  .mobile-top{ margin-left:-10px; margin-right:-10px; }
+  .hero{
+    grid-template-columns:1fr;
+    text-align:center;
+    justify-items:center;
+  }
+  .hero-info{ width:100%; }
+  .xpbar-track{ margin-left:auto; margin-right:auto; }
+  .streak-chips{ justify-content:center; }
+  .streak-chip{
+    width:100%;
+    justify-content:center;
+  }
+  .inline-form{ grid-template-columns:1fr; }
+  .inline-form .btn{ width:100%; }
+  .skill-grid{ grid-template-columns:1fr; }
+  .timeline{ padding-left:28px; }
+  .phase-node{
+    left:-28px;
+    width:26px;
+    height:26px;
+  }
+  .phase-head{ padding:10px; }
+  .rule-note{
+    width:100%;
+    border-radius:10px;
+    align-items:flex-start;
+  }
+  #pomodoroCard > div{
+    flex-direction:column;
+    align-items:stretch !important;
+    gap:12px !important;
+  }
+  #pomodoroCard > div > div:last-child{
+    display:grid !important;
+    grid-template-columns:1fr;
+  }
+  #pomodoroTime{ text-align:center; }
+}
+
+@media (max-width:860px) and (orientation:landscape) and (max-height:520px){
+  .mobile-top{
+    position:relative;
+    margin-bottom:10px;
+  }
+  .main{
+    padding-top:8px;
+    padding-bottom:76px;
+  }
+  .hero{
+    grid-template-columns:auto minmax(0,1fr);
+    text-align:left;
+    justify-items:stretch;
+  }
+  .streak-chips{ justify-content:flex-start; }
+  .streak-chip{ width:auto; }
+  .mobile-nav button{ min-height:44px; }
+}
+
+@media (hover:none), (pointer:coarse){
+  .card,.hero,.skill,.level-card{
+    transform:none !important;
+  }
+  .card:hover,.hero:hover,.skill:hover,.level-card:hover{
+    transform:none !important;
+  }
+}
+
+
+/* =========================================================
+   CORREÇÃO DO MENU MÓVEL
+   O transform da .rpg-root fazia o position:fixed da barra
+   inferior ficar preso ao conteúdo rolável, aparecendo no meio.
+   ========================================================= */
+@media (max-width:860px){
+  .rpg-root{
+    transform:none !important;
+    position:static !important;
+    overflow-x:hidden !important;
+  }
+
+  .mobile-nav{
+    position:fixed !important;
+    top:auto !important;
+    bottom:0 !important;
+    left:0 !important;
+    right:0 !important;
+    z-index:9999 !important;
+    transform:none !important;
+    box-shadow:0 -8px 24px rgba(30,45,61,.12);
+  }
+
+  .main{
+    padding-bottom:calc(108px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .mobile-top{
+    z-index:9000 !important;
+  }
+}
+
 </style>
 
 <div class="rpg-root">
@@ -421,6 +684,9 @@ function icon(name, extra){
     copy:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/>',
     cloud:'<path d="M7 18a4.5 4.5 0 0 1-.4-9 5.5 5.5 0 0 1 10.6-1.7A4 4 0 0 1 17 18z"/>',
     list:'<line x1="8" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="20" y2="12"/><line x1="8" y1="18" x2="20" y2="18"/><circle cx="4" cy="6" r="1.4"/><circle cx="4" cy="12" r="1.4"/><circle cx="4" cy="18" r="1.4"/>',
+    settings:'<circle cx="12" cy="12" r="3.2"/><path d="M19.4 12a7.4 7.4 0 0 0-.1-1.2l2-1.6-2-3.4-2.4 1a7.6 7.6 0 0 0-2-1.2L14 2h-4l-.3 2.6a7.6 7.6 0 0 0-2 1.2l-2.4-1-2 3.4 2 1.6a7.4 7.4 0 0 0 0 2.4l-2 1.6 2 3.4 2.4-1a7.6 7.6 0 0 0 2 1.2L10 22h4l.3-2.6a7.6 7.6 0 0 0 2-1.2l2.4 1 2-3.4-2-1.6a7.4 7.4 0 0 0 .1-1.2z"/>',
+    download:'<path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/>',
+    upload:'<path d="M12 3v12"/><path d="M7 8l5-5 5 5"/><path d="M5 21h14"/>',
   };
   return '<svg class="'+cls+'" viewBox="0 0 24 24">'+(map[name]||'')+'</svg>';
 }
@@ -505,388 +771,117 @@ var DEFAULT_EMPLOYABILITY = [
   'Aplicar para 5 vagas de nível júnior'
 ];
 
-var SKILL_DEFS = [
-  { id:'estudo_t0', name:'Fagulha do Saber', color:'estudo', icon:'book', group:'Estudo',
-    desc:'Estude 2 dias seguidos.', need:2, prog:function(s){return streakFor(s,'estudo');} },
-  { id:'estudo_t1', name:'Primeira Vela', color:'estudo', icon:'book', group:'Estudo',
-    desc:'Estude 3 dias seguidos.', need:3, prog:function(s){return streakFor(s,'estudo');} },
-  { id:'estudo_t2', name:'Constância de Ferro', color:'estudo', icon:'book', group:'Estudo',
-    desc:'Estude 5 dias seguidos.', need:5, prog:function(s){return streakFor(s,'estudo');} },
-  { id:'estudo_t3', name:'Disciplina de Aço', color:'estudo', icon:'book', group:'Estudo',
-    desc:'Estude 7 dias seguidos.', need:7, prog:function(s){return streakFor(s,'estudo');} },
-  { id:'estudo_t4', name:'Ritual Diário', color:'estudo', icon:'book', group:'Estudo',
-    desc:'Estude 10 dias seguidos.', need:10, prog:function(s){return streakFor(s,'estudo');} },
-  { id:'estudo_t5', name:'Rotina Inabalável', color:'estudo', icon:'book', group:'Estudo',
-    desc:'Estude 14 dias seguidos.', need:14, prog:function(s){return streakFor(s,'estudo');} },
-  { id:'estudo_t6', name:'Fluxo Constante', color:'estudo', icon:'book', group:'Estudo',
-    desc:'Estude 21 dias seguidos.', need:21, prog:function(s){return streakFor(s,'estudo');} },
-  { id:'estudo_t7', name:'Forja do Conhecimento', color:'estudo', icon:'book', group:'Estudo',
-    desc:'Estude 30 dias seguidos.', need:30, prog:function(s){return streakFor(s,'estudo');} },
-  { id:'estudo_t8', name:'Mente Afiada', color:'estudo', icon:'book', group:'Estudo',
-    desc:'Estude 45 dias seguidos.', need:45, prog:function(s){return streakFor(s,'estudo');} },
-  { id:'estudo_t9', name:'Sabedoria Crescente', color:'estudo', icon:'book', group:'Estudo',
-    desc:'Estude 60 dias seguidos.', need:60, prog:function(s){return streakFor(s,'estudo');} },
-  { id:'estudo_t10', name:'Chama Eterna', color:'estudo', icon:'book', group:'Estudo',
-    desc:'Estude 75 dias seguidos.', need:75, prog:function(s){return streakFor(s,'estudo');} },
-  { id:'estudo_t11', name:'Mente Eterna', color:'estudo', icon:'book', group:'Estudo',
-    desc:'Estude 90 dias seguidos.', need:90, prog:function(s){return streakFor(s,'estudo');} },
-  { id:'estudo_t12', name:'Guardião do Saber', color:'estudo', icon:'book', group:'Estudo',
-    desc:'Estude 120 dias seguidos.', need:120, prog:function(s){return streakFor(s,'estudo');} },
-  { id:'estudo_t13', name:'Oráculo em Formação', color:'estudo', icon:'book', group:'Estudo',
-    desc:'Estude 150 dias seguidos.', need:150, prog:function(s){return streakFor(s,'estudo');} },
-  { id:'estudo_t14', name:'Avatar do Conhecimento', color:'estudo', icon:'book', group:'Estudo',
-    desc:'Estude 180 dias seguidos.', need:180, prog:function(s){return streakFor(s,'estudo');} },
+/* ---- Fábrica de habilidades em série (tiers) ----
+   Elimina a repetição manual de dezenas de objetos quase idênticos.
+   Cada grupo fornece apenas os dados que realmente variam: os nomes
+   das conquistas e os valores-alvo de cada tier. */
+function tierSkills(idPrefix, group, color, iconName, descFn, progFn, tiers){
+  return tiers.map(function(tier, i){
+    return {
+      id: idPrefix+'_t'+i,
+      name: tier.name,
+      color: color,
+      icon: iconName,
+      group: group,
+      desc: descFn(tier.need),
+      need: tier.need,
+      prog: progFn
+    };
+  });
+}
+function tiers(needs, names){
+  return needs.map(function(need, i){ return { need:need, name:names[i] }; });
+}
 
-  { id:'leitura_t0', name:'Primeira Página', color:'leitura', icon:'bookmark', group:'Leitura',
-    desc:'Leia 2 dias seguidos.', need:2, prog:function(s){return streakFor(s,'leitura');} },
-  { id:'leitura_t1', name:'Marcador de Página', color:'leitura', icon:'bookmark', group:'Leitura',
-    desc:'Leia 3 dias seguidos.', need:3, prog:function(s){return streakFor(s,'leitura');} },
-  { id:'leitura_t2', name:'Mente Aberta', color:'leitura', icon:'bookmark', group:'Leitura',
-    desc:'Leia 5 dias seguidos.', need:5, prog:function(s){return streakFor(s,'leitura');} },
-  { id:'leitura_t3', name:'Leitor Assíduo', color:'leitura', icon:'bookmark', group:'Leitura',
-    desc:'Leia 7 dias seguidos.', need:7, prog:function(s){return streakFor(s,'leitura');} },
-  { id:'leitura_t4', name:'Ritual da Leitura', color:'leitura', icon:'bookmark', group:'Leitura',
-    desc:'Leia 10 dias seguidos.', need:10, prog:function(s){return streakFor(s,'leitura');} },
-  { id:'leitura_t5', name:'Devorador de Capítulos', color:'leitura', icon:'bookmark', group:'Leitura',
-    desc:'Leia 14 dias seguidos.', need:14, prog:function(s){return streakFor(s,'leitura');} },
-  { id:'leitura_t6', name:'Fluxo de Páginas', color:'leitura', icon:'bookmark', group:'Leitura',
-    desc:'Leia 21 dias seguidos.', need:21, prog:function(s){return streakFor(s,'leitura');} },
-  { id:'leitura_t7', name:'Biblioteca Viva', color:'leitura', icon:'bookmark', group:'Leitura',
-    desc:'Leia 30 dias seguidos.', need:30, prog:function(s){return streakFor(s,'leitura');} },
-  { id:'leitura_t8', name:'Colecionador de Histórias', color:'leitura', icon:'bookmark', group:'Leitura',
-    desc:'Leia 45 dias seguidos.', need:45, prog:function(s){return streakFor(s,'leitura');} },
-  { id:'leitura_t9', name:'Sábio em Formação', color:'leitura', icon:'bookmark', group:'Leitura',
-    desc:'Leia 60 dias seguidos.', need:60, prog:function(s){return streakFor(s,'leitura');} },
-  { id:'leitura_t10', name:'Chama da Curiosidade', color:'leitura', icon:'bookmark', group:'Leitura',
-    desc:'Leia 75 dias seguidos.', need:75, prog:function(s){return streakFor(s,'leitura');} },
-  { id:'leitura_t11', name:'Sábio Incansável', color:'leitura', icon:'bookmark', group:'Leitura',
-    desc:'Leia 90 dias seguidos.', need:90, prog:function(s){return streakFor(s,'leitura');} },
-  { id:'leitura_t12', name:'Guardião dos Pergaminhos', color:'leitura', icon:'bookmark', group:'Leitura',
-    desc:'Leia 120 dias seguidos.', need:120, prog:function(s){return streakFor(s,'leitura');} },
-  { id:'leitura_t13', name:'Oráculo das Palavras', color:'leitura', icon:'bookmark', group:'Leitura',
-    desc:'Leia 150 dias seguidos.', need:150, prog:function(s){return streakFor(s,'leitura');} },
-  { id:'leitura_t14', name:'Avatar da Sabedoria', color:'leitura', icon:'bookmark', group:'Leitura',
-    desc:'Leia 180 dias seguidos.', need:180, prog:function(s){return streakFor(s,'leitura');} },
+var progStreak = { estudo:function(s){return streakFor(s,'estudo');}, leitura:function(s){return streakFor(s,'leitura');} };
+var progCount = { boxe:function(s){return countDone(s,'boxe');}, academia:function(s){return countDone(s,'academia');}, corrida:function(s){return countDone(s,'corrida');} };
 
-  { id:'boxe_t0', name:'Primeiro Soco', color:'boxe', icon:'glove', group:'Boxe',
-    desc:'Complete 1 sessões de boxe.', need:1, prog:function(s){return countDone(s,'boxe');} },
-  { id:'boxe_t1', name:'Punho Desperto', color:'boxe', icon:'glove', group:'Boxe',
-    desc:'Complete 2 sessões de boxe.', need:2, prog:function(s){return countDone(s,'boxe');} },
-  { id:'boxe_t2', name:'Punho Forjado', color:'boxe', icon:'glove', group:'Boxe',
-    desc:'Complete 4 sessões de boxe.', need:4, prog:function(s){return countDone(s,'boxe');} },
-  { id:'boxe_t3', name:'Golpe Certeiro', color:'boxe', icon:'glove', group:'Boxe',
-    desc:'Complete 6 sessões de boxe.', need:6, prog:function(s){return countDone(s,'boxe');} },
-  { id:'boxe_t4', name:'Reflexo Rápido', color:'boxe', icon:'glove', group:'Boxe',
-    desc:'Complete 8 sessões de boxe.', need:8, prog:function(s){return countDone(s,'boxe');} },
-  { id:'boxe_t5', name:'Guarda de Ferro', color:'boxe', icon:'glove', group:'Boxe',
-    desc:'Complete 12 sessões de boxe.', need:12, prog:function(s){return countDone(s,'boxe');} },
-  { id:'boxe_t6', name:'Combinação Fluida', color:'boxe', icon:'glove', group:'Boxe',
-    desc:'Complete 16 sessões de boxe.', need:16, prog:function(s){return countDone(s,'boxe');} },
-  { id:'boxe_t7', name:'Fera do Ringue', color:'boxe', icon:'glove', group:'Boxe',
-    desc:'Complete 20 sessões de boxe.', need:20, prog:function(s){return countDone(s,'boxe');} },
-  { id:'boxe_t8', name:'Nocaute Técnico', color:'boxe', icon:'glove', group:'Boxe',
-    desc:'Complete 25 sessões de boxe.', need:25, prog:function(s){return countDone(s,'boxe');} },
-  { id:'boxe_t9', name:'Punho Lendário', color:'boxe', icon:'glove', group:'Boxe',
-    desc:'Complete 30 sessões de boxe.', need:30, prog:function(s){return countDone(s,'boxe');} },
-  { id:'boxe_t10', name:'Mestre do Jab', color:'boxe', icon:'glove', group:'Boxe',
-    desc:'Complete 40 sessões de boxe.', need:40, prog:function(s){return countDone(s,'boxe');} },
-  { id:'boxe_t11', name:'Campeão Invicto', color:'boxe', icon:'glove', group:'Boxe',
-    desc:'Complete 50 sessões de boxe.', need:50, prog:function(s){return countDone(s,'boxe');} },
-  { id:'boxe_t12', name:'Terror do Ringue', color:'boxe', icon:'glove', group:'Boxe',
-    desc:'Complete 65 sessões de boxe.', need:65, prog:function(s){return countDone(s,'boxe');} },
-  { id:'boxe_t13', name:'Lenda do Boxe', color:'boxe', icon:'glove', group:'Boxe',
-    desc:'Complete 80 sessões de boxe.', need:80, prog:function(s){return countDone(s,'boxe');} },
-  { id:'boxe_t14', name:'Avatar do Combate', color:'boxe', icon:'glove', group:'Boxe',
-    desc:'Complete 100 sessões de boxe.', need:100, prog:function(s){return countDone(s,'boxe');} },
+var SKILL_DEFS = [].concat(
+  tierSkills('estudo','Estudo','estudo','book', function(n){return 'Estude '+n+' dias seguidos.';}, progStreak.estudo,
+    tiers([2,3,5,7,10,14,21,30,45,60,75,90,120,150,180],
+      ['Fagulha do Saber','Primeira Vela','Constância de Ferro','Disciplina de Aço','Ritual Diário','Rotina Inabalável','Fluxo Constante','Forja do Conhecimento','Mente Afiada','Sabedoria Crescente','Chama Eterna','Mente Eterna','Guardião do Saber','Oráculo em Formação','Avatar do Conhecimento'])),
 
-  { id:'academia_t0', name:'Primeiro Treino', color:'academia', icon:'dumbbell', group:'Academia',
-    desc:'Complete 1 sessões de academia.', need:1, prog:function(s){return countDone(s,'academia');} },
-  { id:'academia_t1', name:'Suor Inicial', color:'academia', icon:'dumbbell', group:'Academia',
-    desc:'Complete 3 sessões de academia.', need:3, prog:function(s){return countDone(s,'academia');} },
-  { id:'academia_t2', name:'Corpo de Aço', color:'academia', icon:'dumbbell', group:'Academia',
-    desc:'Complete 6 sessões de academia.', need:6, prog:function(s){return countDone(s,'academia');} },
-  { id:'academia_t3', name:'Disciplina de Ferro', color:'academia', icon:'dumbbell', group:'Academia',
-    desc:'Complete 9 sessões de academia.', need:9, prog:function(s){return countDone(s,'academia');} },
-  { id:'academia_t4', name:'Força Crescente', color:'academia', icon:'dumbbell', group:'Academia',
-    desc:'Complete 12 sessões de academia.', need:12, prog:function(s){return countDone(s,'academia');} },
-  { id:'academia_t5', name:'Músculo de Titânio', color:'academia', icon:'dumbbell', group:'Academia',
-    desc:'Complete 18 sessões de academia.', need:18, prog:function(s){return countDone(s,'academia');} },
-  { id:'academia_t6', name:'Resistência Forjada', color:'academia', icon:'dumbbell', group:'Academia',
-    desc:'Complete 24 sessões de academia.', need:24, prog:function(s){return countDone(s,'academia');} },
-  { id:'academia_t7', name:'Força Bruta', color:'academia', icon:'dumbbell', group:'Academia',
-    desc:'Complete 32 sessões de academia.', need:32, prog:function(s){return countDone(s,'academia');} },
-  { id:'academia_t8', name:'Colosso', color:'academia', icon:'dumbbell', group:'Academia',
-    desc:'Complete 40 sessões de academia.', need:40, prog:function(s){return countDone(s,'academia');} },
-  { id:'academia_t9', name:'Máquina de Treino', color:'academia', icon:'dumbbell', group:'Academia',
-    desc:'Complete 50 sessões de academia.', need:50, prog:function(s){return countDone(s,'academia');} },
-  { id:'academia_t10', name:'Hércules Moderno', color:'academia', icon:'dumbbell', group:'Academia',
-    desc:'Complete 65 sessões de academia.', need:65, prog:function(s){return countDone(s,'academia');} },
-  { id:'academia_t11', name:'Titã da Academia', color:'academia', icon:'dumbbell', group:'Academia',
-    desc:'Complete 80 sessões de academia.', need:80, prog:function(s){return countDone(s,'academia');} },
-  { id:'academia_t12', name:'Semideus do Ferro', color:'academia', icon:'dumbbell', group:'Academia',
-    desc:'Complete 100 sessões de academia.', need:100, prog:function(s){return countDone(s,'academia');} },
-  { id:'academia_t13', name:'Lenda da Musculação', color:'academia', icon:'dumbbell', group:'Academia',
-    desc:'Complete 125 sessões de academia.', need:125, prog:function(s){return countDone(s,'academia');} },
-  { id:'academia_t14', name:'Avatar da Força', color:'academia', icon:'dumbbell', group:'Academia',
-    desc:'Complete 150 sessões de academia.', need:150, prog:function(s){return countDone(s,'academia');} },
+  tierSkills('leitura','Leitura','leitura','bookmark', function(n){return 'Leia '+n+' dias seguidos.';}, progStreak.leitura,
+    tiers([2,3,5,7,10,14,21,30,45,60,75,90,120,150,180],
+      ['Primeira Página','Marcador de Página','Mente Aberta','Leitor Assíduo','Ritual da Leitura','Devorador de Capítulos','Fluxo de Páginas','Biblioteca Viva','Colecionador de Histórias','Sábio em Formação','Chama da Curiosidade','Sábio Incansável','Guardião dos Pergaminhos','Oráculo das Palavras','Avatar da Sabedoria'])),
 
-  { id:'corrida_t0', name:'Primeira Corrida', color:'corrida', icon:'run', group:'Corrida',
-    desc:'Complete 1 corridas de sábado.', need:1, prog:function(s){return countDone(s,'corrida');} },
-  { id:'corrida_t1', name:'Passo Firme', color:'corrida', icon:'run', group:'Corrida',
-    desc:'Complete 2 corridas de sábado.', need:2, prog:function(s){return countDone(s,'corrida');} },
-  { id:'corrida_t2', name:'Fôlego Longo', color:'corrida', icon:'run', group:'Corrida',
-    desc:'Complete 4 corridas de sábado.', need:4, prog:function(s){return countDone(s,'corrida');} },
-  { id:'corrida_t3', name:'Vento Constante', color:'corrida', icon:'run', group:'Corrida',
-    desc:'Complete 6 corridas de sábado.', need:6, prog:function(s){return countDone(s,'corrida');} },
-  { id:'corrida_t4', name:'Ritmo Constante', color:'corrida', icon:'run', group:'Corrida',
-    desc:'Complete 8 corridas de sábado.', need:8, prog:function(s){return countDone(s,'corrida');} },
-  { id:'corrida_t5', name:'Maratonista Nato', color:'corrida', icon:'run', group:'Corrida',
-    desc:'Complete 12 corridas de sábado.', need:12, prog:function(s){return countDone(s,'corrida');} },
-  { id:'corrida_t6', name:'Passada Firme', color:'corrida', icon:'run', group:'Corrida',
-    desc:'Complete 16 corridas de sábado.', need:16, prog:function(s){return countDone(s,'corrida');} },
-  { id:'corrida_t7', name:'Pernas de Aço', color:'corrida', icon:'run', group:'Corrida',
-    desc:'Complete 20 corridas de sábado.', need:20, prog:function(s){return countDone(s,'corrida');} },
-  { id:'corrida_t8', name:'Fôlego Infinito', color:'corrida', icon:'run', group:'Corrida',
-    desc:'Complete 25 corridas de sábado.', need:25, prog:function(s){return countDone(s,'corrida');} },
-  { id:'corrida_t9', name:'Corredor Incansável', color:'corrida', icon:'run', group:'Corrida',
-    desc:'Complete 30 corridas de sábado.', need:30, prog:function(s){return countDone(s,'corrida');} },
-  { id:'corrida_t10', name:'Velocista Nato', color:'corrida', icon:'run', group:'Corrida',
-    desc:'Complete 40 corridas de sábado.', need:40, prog:function(s){return countDone(s,'corrida');} },
-  { id:'corrida_t11', name:'Maratonista Lendário', color:'corrida', icon:'run', group:'Corrida',
-    desc:'Complete 50 corridas de sábado.', need:50, prog:function(s){return countDone(s,'corrida');} },
-  { id:'corrida_t12', name:'Guardião do Asfalto', color:'corrida', icon:'run', group:'Corrida',
-    desc:'Complete 65 corridas de sábado.', need:65, prog:function(s){return countDone(s,'corrida');} },
-  { id:'corrida_t13', name:'Lenda do Asfalto', color:'corrida', icon:'run', group:'Corrida',
-    desc:'Complete 80 corridas de sábado.', need:80, prog:function(s){return countDone(s,'corrida');} },
-  { id:'corrida_t14', name:'Avatar da Velocidade', color:'corrida', icon:'run', group:'Corrida',
-    desc:'Complete 100 corridas de sábado.', need:100, prog:function(s){return countDone(s,'corrida');} },
+  tierSkills('boxe','Boxe','boxe','glove', function(n){return 'Complete '+n+' sessões de boxe.';}, progCount.boxe,
+    tiers([1,2,4,6,8,12,16,20,25,30,40,50,65,80,100],
+      ['Primeiro Soco','Punho Desperto','Punho Forjado','Golpe Certeiro','Reflexo Rápido','Guarda de Ferro','Combinação Fluida','Fera do Ringue','Nocaute Técnico','Punho Lendário','Mestre do Jab','Campeão Invicto','Terror do Ringue','Lenda do Boxe','Avatar do Combate'])),
 
-  { id:'fase0', name:'Primeiro Feitiço', color:'gold', icon:'book', group:'Trilha de Estudo',
-    desc:'Conclua a Fase 0 — Fundamentos.', need:1, prog:function(s){return phaseComplete(s,0)?1:0;} },
-  { id:'fase1', name:'Mestre das Classes', color:'gold', icon:'book', group:'Trilha de Estudo',
-    desc:'Conclua a Fase 1 — Orientação a Objetos.', need:1, prog:function(s){return phaseComplete(s,1)?1:0;} },
-  { id:'fase2', name:'Domador de Ferramentas', color:'gold', icon:'book', group:'Trilha de Estudo',
-    desc:'Conclua a Fase 2 — Ferramentas Essenciais.', need:1, prog:function(s){return phaseComplete(s,2)?1:0;} },
-  { id:'fase3', name:'Guardião dos Dados', color:'gold', icon:'book', group:'Trilha de Estudo',
-    desc:'Conclua a Fase 3 — Persistência e Banco de Dados.', need:1, prog:function(s){return phaseComplete(s,3)?1:0;} },
-  { id:'guerreiro_fs', name:'Guerreiro Full Stack', color:'gold', icon:'trophy', group:'Trilha de Estudo',
-    desc:'Conclua a Fase 4 — Spring Boot.', need:1, prog:function(s){return phaseComplete(s,4)?1:0;} },
-  { id:'fase5', name:'Arquiteto Consolidado', color:'gold', icon:'book', group:'Trilha de Estudo',
-    desc:'Conclua a Fase 5 — Consolidação e Portfólio.', need:1, prog:function(s){return phaseComplete(s,5)?1:0;} },
-  { id:'lenda_codex', name:'Lenda do Códex', color:'gold', icon:'star', group:'Trilha de Estudo',
-    desc:'Conclua as 6 fases do roteiro Java.', need:1, prog:function(s){
-      for(var i=0;i<STUDY_PHASES.length;i++){ if(!phaseComplete(s,i)) return 0; } return 1; } },
+  tierSkills('academia','Academia','academia','dumbbell', function(n){return 'Complete '+n+' sessões de academia.';}, progCount.academia,
+    tiers([1,3,6,9,12,18,24,32,40,50,65,80,100,125,150],
+      ['Primeiro Treino','Suor Inicial','Corpo de Aço','Disciplina de Ferro','Força Crescente','Músculo de Titânio','Resistência Forjada','Força Bruta','Colosso','Máquina de Treino','Hércules Moderno','Titã da Academia','Semideus do Ferro','Lenda da Musculação','Avatar da Força'])),
 
-  { id:'itemestudo_t0', name:'Primeiras Anotações', color:'estudo', icon:'book', group:'Itens de Estudo',
-    desc:'Conclua 5 itens de estudo do roteiro Java.', need:5, prog:function(s){return countStudyItemsDone(s);} },
-  { id:'itemestudo_t1', name:'Caderno Recheado', color:'estudo', icon:'book', group:'Itens de Estudo',
-    desc:'Conclua 10 itens de estudo do roteiro Java.', need:10, prog:function(s){return countStudyItemsDone(s);} },
-  { id:'itemestudo_t2', name:'Meio Caminho Andado', color:'estudo', icon:'book', group:'Itens de Estudo',
-    desc:'Conclua 15 itens de estudo do roteiro Java.', need:15, prog:function(s){return countStudyItemsDone(s);} },
-  { id:'itemestudo_t3', name:'Quase Lá', color:'estudo', icon:'book', group:'Itens de Estudo',
-    desc:'Conclua 20 itens de estudo do roteiro Java.', need:20, prog:function(s){return countStudyItemsDone(s);} },
-  { id:'itemestudo_t4', name:'Roteiro Dominado', color:'estudo', icon:'book', group:'Itens de Estudo',
-    desc:'Conclua 25 itens de estudo do roteiro Java.', need:25, prog:function(s){return countStudyItemsDone(s);} },
+  tierSkills('corrida','Corrida','corrida','run', function(n){return 'Complete '+n+' corridas de sábado.';}, progCount.corrida,
+    tiers([1,2,4,6,8,12,16,20,25,30,40,50,65,80,100],
+      ['Primeira Corrida','Passo Firme','Fôlego Longo','Vento Constante','Ritmo Constante','Maratonista Nato','Passada Firme','Pernas de Aço','Fôlego Infinito','Corredor Incansável','Velocista Nato','Maratonista Lendário','Guardião do Asfalto','Lenda do Asfalto','Avatar da Velocidade'])),
 
-  { id:'bonus0', name:'Filho da Internet', color:'gold', icon:'trophy', group:'Mapa de Backend',
-    desc:'Complete o grupo Internet & Fundamentos.', need:1, prog:function(s){return bonusGroupComplete(s,0)?1:0;} },
-  { id:'bonus1', name:'Mestre do Git', color:'gold', icon:'trophy', group:'Mapa de Backend',
-    desc:'Complete o grupo Controle de Versão.', need:1, prog:function(s){return bonusGroupComplete(s,1)?1:0;} },
-  { id:'bonus2', name:'Guardião dos Dados Relacionais', color:'gold', icon:'trophy', group:'Mapa de Backend',
-    desc:'Complete o grupo Bancos de Dados.', need:1, prog:function(s){return bonusGroupComplete(s,2)?1:0;} },
-  { id:'bonus3', name:'Arquiteto de APIs', color:'gold', icon:'trophy', group:'Mapa de Backend',
-    desc:'Complete o grupo APIs.', need:1, prog:function(s){return bonusGroupComplete(s,3)?1:0;} },
-  { id:'bonus4', name:'Caçador de Latência', color:'gold', icon:'trophy', group:'Mapa de Backend',
-    desc:'Complete o grupo Cache & Performance.', need:1, prog:function(s){return bonusGroupComplete(s,4)?1:0;} },
-  { id:'bonus5', name:'Sentinela da Segurança', color:'gold', icon:'trophy', group:'Mapa de Backend',
-    desc:'Complete o grupo Segurança.', need:1, prog:function(s){return bonusGroupComplete(s,5)?1:0;} },
-  { id:'bonus6', name:'Guardião da Qualidade', color:'gold', icon:'trophy', group:'Mapa de Backend',
-    desc:'Complete o grupo Testes & CI/CD.', need:1, prog:function(s){return bonusGroupComplete(s,6)?1:0;} },
-  { id:'bonus7', name:'Mestre dos Padrões', color:'gold', icon:'trophy', group:'Mapa de Backend',
-    desc:'Complete o grupo Arquitetura & Padrões.', need:1, prog:function(s){return bonusGroupComplete(s,7)?1:0;} },
-  { id:'bonus8', name:'Senhor da Infraestrutura', color:'gold', icon:'trophy', group:'Mapa de Backend',
-    desc:'Complete o grupo Escalabilidade & Infra.', need:1, prog:function(s){return bonusGroupComplete(s,8)?1:0;} },
+  /* Trilha de Estudo: cada conquista está amarrada a uma fase específica do roteiro Java, então fica explícita. */
+  [0,1,2,3].map(function(idx){
+    var names = ['Primeiro Feitiço','Mestre das Classes','Domador de Ferramentas','Guardião dos Dados'];
+    return { id:'fase'+idx, name:names[idx], color:'gold', icon:'book', group:'Trilha de Estudo',
+      desc:'Conclua a Fase '+idx+' — '+STUDY_PHASES[idx].title+'.', need:1,
+      prog:function(s){return phaseComplete(s,idx)?1:0;} };
+  }),
+  [
+    { id:'guerreiro_fs', name:'Guerreiro Full Stack', color:'gold', icon:'trophy', group:'Trilha de Estudo',
+      desc:'Conclua a Fase 4 — Spring Boot.', need:1, prog:function(s){return phaseComplete(s,4)?1:0;} },
+    { id:'fase5', name:'Arquiteto Consolidado', color:'gold', icon:'book', group:'Trilha de Estudo',
+      desc:'Conclua a Fase 5 — Consolidação e Portfólio.', need:1, prog:function(s){return phaseComplete(s,5)?1:0;} },
+    { id:'lenda_codex', name:'Lenda do Códex', color:'gold', icon:'star', group:'Trilha de Estudo',
+      desc:'Conclua as 6 fases do roteiro Java.', need:1, prog:function(s){
+        for(var i=0;i<STUDY_PHASES.length;i++){ if(!phaseComplete(s,i)) return 0; } return 1; } }
+  ],
 
-  { id:'itembackend_t0', name:'Explorador do Mapa', color:'gold', icon:'trophy', group:'Itens de Backend',
-    desc:'Conclua 6 itens do mapa avançado de backend.', need:6, prog:function(s){return countBonusItemsDone(s);} },
-  { id:'itembackend_t1', name:'Cartógrafo Iniciante', color:'gold', icon:'trophy', group:'Itens de Backend',
-    desc:'Conclua 12 itens do mapa avançado de backend.', need:12, prog:function(s){return countBonusItemsDone(s);} },
-  { id:'itembackend_t2', name:'Meio Mapa Desvendado', color:'gold', icon:'trophy', group:'Itens de Backend',
-    desc:'Conclua 18 itens do mapa avançado de backend.', need:18, prog:function(s){return countBonusItemsDone(s);} },
-  { id:'itembackend_t3', name:'Cartógrafo Experiente', color:'gold', icon:'trophy', group:'Itens de Backend',
-    desc:'Conclua 24 itens do mapa avançado de backend.', need:24, prog:function(s){return countBonusItemsDone(s);} },
-  { id:'itembackend_t4', name:'Quase no Topo', color:'gold', icon:'trophy', group:'Itens de Backend',
-    desc:'Conclua 30 itens do mapa avançado de backend.', need:30, prog:function(s){return countBonusItemsDone(s);} },
-  { id:'itembackend_t5', name:'Mapa Completo', color:'gold', icon:'trophy', group:'Itens de Backend',
-    desc:'Conclua 36 itens do mapa avançado de backend.', need:36, prog:function(s){return countBonusItemsDone(s);} },
+  tierSkills('itemestudo','Itens de Estudo','estudo','book', function(n){return 'Conclua '+n+' itens de estudo do roteiro Java.';}, countStudyItemsDone,
+    tiers([5,10,15,20,25], ['Primeiras Anotações','Caderno Recheado','Meio Caminho Andado','Quase Lá','Roteiro Dominado'])),
 
-  { id:'emprego_t0', name:'Primeiros Passos na Carreira', color:'gold', icon:'briefcase', group:'Carreira',
-    desc:'Complete 1 tarefa(s) de empregabilidade.', need:1, prog:function(s){return s.employability.filter(function(t){return t.done;}).length;} },
-  { id:'emprego_t1', name:'Currículo em Construção', color:'gold', icon:'briefcase', group:'Carreira',
-    desc:'Complete 3 tarefa(s) de empregabilidade.', need:3, prog:function(s){return s.employability.filter(function(t){return t.done;}).length;} },
-  { id:'emprego_t2', name:'Pronto pro Combate', color:'gold', icon:'briefcase', group:'Carreira',
-    desc:'Complete 5 tarefa(s) de empregabilidade.', need:5, prog:function(s){return s.employability.filter(function(t){return t.done;}).length;} },
-  { id:'emprego_t3', name:'Networking Ativo', color:'gold', icon:'briefcase', group:'Carreira',
-    desc:'Complete 7 tarefa(s) de empregabilidade.', need:7, prog:function(s){return s.employability.filter(function(t){return t.done;}).length;} },
-  { id:'emprego_t4', name:'Quase Empregável', color:'gold', icon:'briefcase', group:'Carreira',
-    desc:'Complete 9 tarefa(s) de empregabilidade.', need:9, prog:function(s){return s.employability.filter(function(t){return t.done;}).length;} },
+  /* Mapa de Backend: uma conquista por seção do BONUS_TRACK, gerada a partir dos próprios títulos. */
+  BONUS_TRACK.map(function(group, gi){
+    var names = ['Filho da Internet','Mestre do Git','Guardião dos Dados Relacionais','Arquiteto de APIs','Caçador de Latência','Sentinela da Segurança','Guardião da Qualidade','Mestre dos Padrões','Senhor da Infraestrutura'];
+    return { id:'bonus'+gi, name:names[gi], color:'gold', icon:'trophy', group:'Mapa de Backend',
+      desc:'Complete o grupo '+group.section+'.', need:1, prog:function(s){return bonusGroupComplete(s,gi)?1:0;} };
+  }),
 
-  { id:'emprego_all', name:'Caçador de Vagas Lendário', color:'gold', icon:'briefcase', group:'Carreira',
-    desc:'Complete toda a trilha de empregabilidade.', need:1, prog:function(s){
-      if(!s.employability.length) return 0;
-      return s.employability.every(function(t){return t.done;}) ? 1 : 0; } },
+  tierSkills('itembackend','Itens de Backend','gold','trophy', function(n){return 'Conclua '+n+' itens do mapa avançado de backend.';}, countBonusItemsDone,
+    tiers([6,12,18,24,30,36], ['Explorador do Mapa','Cartógrafo Iniciante','Meio Mapa Desvendado','Cartógrafo Experiente','Quase no Topo','Mapa Completo'])),
 
-  { id:'diario_t0', name:'Primeira Linha', color:'leitura', icon:'feather', group:'Diário de Bordo',
-    desc:'Escreva 1 entrada(s) no diário.', need:1, prog:function(s){return s.diary.length;} },
-  { id:'diario_t1', name:'Primeiras Memórias', color:'leitura', icon:'feather', group:'Diário de Bordo',
-    desc:'Escreva 3 entrada(s) no diário.', need:3, prog:function(s){return s.diary.length;} },
-  { id:'diario_t2', name:'Hábito de Escrever', color:'leitura', icon:'feather', group:'Diário de Bordo',
-    desc:'Escreva 5 entrada(s) no diário.', need:5, prog:function(s){return s.diary.length;} },
-  { id:'diario_t3', name:'Cronista da Jornada', color:'leitura', icon:'feather', group:'Diário de Bordo',
-    desc:'Escreva 10 entrada(s) no diário.', need:10, prog:function(s){return s.diary.length;} },
-  { id:'diario_t4', name:'Páginas Acumuladas', color:'leitura', icon:'feather', group:'Diário de Bordo',
-    desc:'Escreva 15 entrada(s) no diário.', need:15, prog:function(s){return s.diary.length;} },
-  { id:'diario_t5', name:'Guardião das Memórias', color:'leitura', icon:'feather', group:'Diário de Bordo',
-    desc:'Escreva 20 entrada(s) no diário.', need:20, prog:function(s){return s.diary.length;} },
-  { id:'diario_t6', name:'Arquivo Pessoal', color:'leitura', icon:'feather', group:'Diário de Bordo',
-    desc:'Escreva 30 entrada(s) no diário.', need:30, prog:function(s){return s.diary.length;} },
-  { id:'diario_t7', name:'Historiador Lendário', color:'leitura', icon:'feather', group:'Diário de Bordo',
-    desc:'Escreva 40 entrada(s) no diário.', need:40, prog:function(s){return s.diary.length;} },
-  { id:'diario_t8', name:'Biblioteca da Alma', color:'leitura', icon:'feather', group:'Diário de Bordo',
-    desc:'Escreva 60 entrada(s) no diário.', need:60, prog:function(s){return s.diary.length;} },
-  { id:'diario_t9', name:'Cronista Eterno', color:'leitura', icon:'feather', group:'Diário de Bordo',
-    desc:'Escreva 90 entrada(s) no diário.', need:90, prog:function(s){return s.diary.length;} },
+  tierSkills('emprego','Carreira','gold','briefcase', function(n){return 'Complete '+n+' tarefa(s) de empregabilidade.';},
+    function(s){return s.employability.filter(function(t){return t.done;}).length;},
+    tiers([1,3,5,7,9], ['Primeiros Passos na Carreira','Currículo em Construção','Pronto pro Combate','Networking Ativo','Quase Empregável'])),
+  [{ id:'emprego_all', name:'Caçador de Vagas Lendário', color:'gold', icon:'briefcase', group:'Carreira',
+     desc:'Complete toda a trilha de empregabilidade.', need:1, prog:function(s){
+       if(!s.employability.length) return 0;
+       return s.employability.every(function(t){return t.done;}) ? 1 : 0; } }],
 
-  { id:'perfeito_t0', name:'Primeiro Dia Impecável', color:'gold', icon:'fire', group:'Dias Perfeitos',
-    desc:'Alcance 1 dia(s) perfeito(s).', need:1, prog:function(s){return countPerfectDays(s);} },
-  { id:'perfeito_t1', name:'Trinca Perfeita', color:'gold', icon:'fire', group:'Dias Perfeitos',
-    desc:'Alcance 3 dia(s) perfeito(s).', need:3, prog:function(s){return countPerfectDays(s);} },
-  { id:'perfeito_t2', name:'Dia Impecável', color:'gold', icon:'fire', group:'Dias Perfeitos',
-    desc:'Alcance 5 dia(s) perfeito(s).', need:5, prog:function(s){return countPerfectDays(s);} },
-  { id:'perfeito_t3', name:'Sequência de Ouro', color:'gold', icon:'fire', group:'Dias Perfeitos',
-    desc:'Alcance 10 dia(s) perfeito(s).', need:10, prog:function(s){return countPerfectDays(s);} },
-  { id:'perfeito_t4', name:'Semana Impecável', color:'gold', icon:'fire', group:'Dias Perfeitos',
-    desc:'Alcance 15 dia(s) perfeito(s).', need:15, prog:function(s){return countPerfectDays(s);} },
-  { id:'perfeito_t5', name:'Mês Perfeito', color:'gold', icon:'fire', group:'Dias Perfeitos',
-    desc:'Alcance 20 dia(s) perfeito(s).', need:20, prog:function(s){return countPerfectDays(s);} },
-  { id:'perfeito_t6', name:'Constância Absoluta', color:'gold', icon:'fire', group:'Dias Perfeitos',
-    desc:'Alcance 30 dia(s) perfeito(s).', need:30, prog:function(s){return countPerfectDays(s);} },
-  { id:'perfeito_t7', name:'Perfeição Absoluta', color:'gold', icon:'fire', group:'Dias Perfeitos',
-    desc:'Alcance 40 dia(s) perfeito(s).', need:40, prog:function(s){return countPerfectDays(s);} },
-  { id:'perfeito_t8', name:'Trimestre Impecável', color:'gold', icon:'fire', group:'Dias Perfeitos',
-    desc:'Alcance 60 dia(s) perfeito(s).', need:60, prog:function(s){return countPerfectDays(s);} },
-  { id:'perfeito_t9', name:'Lenda da Perfeição', color:'gold', icon:'fire', group:'Dias Perfeitos',
-    desc:'Alcance 90 dia(s) perfeito(s).', need:90, prog:function(s){return countPerfectDays(s);} },
+  tierSkills('diario','Diário de Bordo','leitura','feather', function(n){return 'Escreva '+n+' entrada(s) no diário.';}, function(s){return s.diary.length;},
+    tiers([1,3,5,10,15,20,30,40,60,90],
+      ['Primeira Linha','Primeiras Memórias','Hábito de Escrever','Cronista da Jornada','Páginas Acumuladas','Guardião das Memórias','Arquivo Pessoal','Historiador Lendário','Biblioteca da Alma','Cronista Eterno'])),
 
-  { id:'nivel_t0', name:'Primeira Ascensão', color:'gold', icon:'star', group:'Ascensão de Nível',
-    desc:'Alcance o nível 5.', need:5, prog:function(s){return levelOf(s);} },
-  { id:'nivel_t1', name:'Ascensão do Cavaleiro', color:'gold', icon:'star', group:'Ascensão de Nível',
-    desc:'Alcance o nível 10.', need:10, prog:function(s){return levelOf(s);} },
-  { id:'nivel_t2', name:'Ascensão do Paladino', color:'gold', icon:'star', group:'Ascensão de Nível',
-    desc:'Alcance o nível 15.', need:15, prog:function(s){return levelOf(s);} },
-  { id:'nivel_t3', name:'Ascensão do Arquimago', color:'gold', icon:'star', group:'Ascensão de Nível',
-    desc:'Alcance o nível 20.', need:20, prog:function(s){return levelOf(s);} },
-  { id:'nivel_t4', name:'Ascensão do Mestre', color:'gold', icon:'star', group:'Ascensão de Nível',
-    desc:'Alcance o nível 25.', need:25, prog:function(s){return levelOf(s);} },
-  { id:'nivel_t5', name:'Transcendência do Códex', color:'gold', icon:'star', group:'Ascensão de Nível',
-    desc:'Alcance o nível 30.', need:30, prog:function(s){return levelOf(s);} },
-  { id:'nivel_t6', name:'Ascensão Suprema', color:'gold', icon:'star', group:'Ascensão de Nível',
-    desc:'Alcance o nível 40.', need:40, prog:function(s){return levelOf(s);} },
-  { id:'nivel_t7', name:'Avatar do Código', color:'gold', icon:'star', group:'Ascensão de Nível',
-    desc:'Alcance o nível 50.', need:50, prog:function(s){return levelOf(s);} },
+  tierSkills('perfeito','Dias Perfeitos','gold','fire', function(n){return 'Alcance '+n+' dia(s) perfeito(s).';}, countPerfectDays,
+    tiers([1,3,5,10,15,20,30,40,60,90],
+      ['Primeiro Dia Impecável','Trinca Perfeita','Dia Impecável','Sequência de Ouro','Semana Impecável','Mês Perfeito','Constância Absoluta','Perfeição Absoluta','Trimestre Impecável','Lenda da Perfeição'])),
 
-  { id:'xp_t0', name:'Primeiro Tesouro', color:'gold', icon:'star', group:'Riqueza de XP',
-    desc:'Acumule 100 XP.', need:100, prog:function(s){return s.totalXP;} },
-  { id:'xp_t1', name:'Bolsa de XP', color:'gold', icon:'star', group:'Riqueza de XP',
-    desc:'Acumule 250 XP.', need:250, prog:function(s){return s.totalXP;} },
-  { id:'xp_t2', name:'Cofre Crescente', color:'gold', icon:'star', group:'Riqueza de XP',
-    desc:'Acumule 500 XP.', need:500, prog:function(s){return s.totalXP;} },
-  { id:'xp_t3', name:'Baú de Conhecimento', color:'gold', icon:'star', group:'Riqueza de XP',
-    desc:'Acumule 1000 XP.', need:1000, prog:function(s){return s.totalXP;} },
-  { id:'xp_t4', name:'Fortuna em Ascensão', color:'gold', icon:'star', group:'Riqueza de XP',
-    desc:'Acumule 1500 XP.', need:1500, prog:function(s){return s.totalXP;} },
-  { id:'xp_t5', name:'Tesouro Considerável', color:'gold', icon:'star', group:'Riqueza de XP',
-    desc:'Acumule 2000 XP.', need:2000, prog:function(s){return s.totalXP;} },
-  { id:'xp_t6', name:'Cofre Reluzente', color:'gold', icon:'star', group:'Riqueza de XP',
-    desc:'Acumule 3000 XP.', need:3000, prog:function(s){return s.totalXP;} },
-  { id:'xp_t7', name:'Fortuna do Códex', color:'gold', icon:'star', group:'Riqueza de XP',
-    desc:'Acumule 4000 XP.', need:4000, prog:function(s){return s.totalXP;} },
-  { id:'xp_t8', name:'Tesouro Épico', color:'gold', icon:'star', group:'Riqueza de XP',
-    desc:'Acumule 5000 XP.', need:5000, prog:function(s){return s.totalXP;} },
-  { id:'xp_t9', name:'Cofre Lendário', color:'gold', icon:'star', group:'Riqueza de XP',
-    desc:'Acumule 7500 XP.', need:7500, prog:function(s){return s.totalXP;} },
-  { id:'xp_t10', name:'Fortuna Lendária', color:'gold', icon:'star', group:'Riqueza de XP',
-    desc:'Acumule 10000 XP.', need:10000, prog:function(s){return s.totalXP;} },
-  { id:'xp_t11', name:'Tesouro Mítico', color:'gold', icon:'star', group:'Riqueza de XP',
-    desc:'Acumule 15000 XP.', need:15000, prog:function(s){return s.totalXP;} },
-  { id:'xp_t12', name:'Riqueza Incalculável', color:'gold', icon:'star', group:'Riqueza de XP',
-    desc:'Acumule 20000 XP.', need:20000, prog:function(s){return s.totalXP;} },
-  { id:'xp_t13', name:'Avatar da Fortuna', color:'gold', icon:'star', group:'Riqueza de XP',
-    desc:'Acumule 30000 XP.', need:30000, prog:function(s){return s.totalXP;} },
+  tierSkills('nivel','Ascensão de Nível','gold','star', function(n){return 'Alcance o nível '+n+'.';}, levelOf,
+    tiers([5,10,15,20,25,30,40,50],
+      ['Primeira Ascensão','Ascensão do Cavaleiro','Ascensão do Paladino','Ascensão do Arquimago','Ascensão do Mestre','Transcendência do Códex','Ascensão Suprema','Avatar do Código'])),
 
-  { id:'missoes_t0', name:'Primeiras Missões', color:'gold', icon:'check2', group:'Missões Totais',
-    desc:'Complete 10 missões diárias no total.', need:10, prog:function(s){return totalDailyTasksDone(s);} },
-  { id:'missoes_t1', name:'Aventureiro Ativo', color:'gold', icon:'check2', group:'Missões Totais',
-    desc:'Complete 25 missões diárias no total.', need:25, prog:function(s){return totalDailyTasksDone(s);} },
-  { id:'missoes_t2', name:'Meio Centenar', color:'gold', icon:'check2', group:'Missões Totais',
-    desc:'Complete 50 missões diárias no total.', need:50, prog:function(s){return totalDailyTasksDone(s);} },
-  { id:'missoes_t3', name:'Centena de Missões', color:'gold', icon:'check2', group:'Missões Totais',
-    desc:'Complete 100 missões diárias no total.', need:100, prog:function(s){return totalDailyTasksDone(s);} },
-  { id:'missoes_t4', name:'Aventureiro Experiente', color:'gold', icon:'check2', group:'Missões Totais',
-    desc:'Complete 150 missões diárias no total.', need:150, prog:function(s){return totalDailyTasksDone(s);} },
-  { id:'missoes_t5', name:'Duzentas Batalhas', color:'gold', icon:'check2', group:'Missões Totais',
-    desc:'Complete 200 missões diárias no total.', need:200, prog:function(s){return totalDailyTasksDone(s);} },
-  { id:'missoes_t6', name:'Trezentas Conquistas', color:'gold', icon:'check2', group:'Missões Totais',
-    desc:'Complete 300 missões diárias no total.', need:300, prog:function(s){return totalDailyTasksDone(s);} },
-  { id:'missoes_t7', name:'Veterano de Missões', color:'gold', icon:'check2', group:'Missões Totais',
-    desc:'Complete 400 missões diárias no total.', need:400, prog:function(s){return totalDailyTasksDone(s);} },
-  { id:'missoes_t8', name:'Quinhentas Vitórias', color:'gold', icon:'check2', group:'Missões Totais',
-    desc:'Complete 500 missões diárias no total.', need:500, prog:function(s){return totalDailyTasksDone(s);} },
-  { id:'missoes_t9', name:'Setecentas Jornadas', color:'gold', icon:'check2', group:'Missões Totais',
-    desc:'Complete 750 missões diárias no total.', need:750, prog:function(s){return totalDailyTasksDone(s);} },
-  { id:'missoes_t10', name:'Milhar Histórico', color:'gold', icon:'check2', group:'Missões Totais',
-    desc:'Complete 1000 missões diárias no total.', need:1000, prog:function(s){return totalDailyTasksDone(s);} },
-  { id:'missoes_t11', name:'Mil e Quinhentas Sagas', color:'gold', icon:'check2', group:'Missões Totais',
-    desc:'Complete 1500 missões diárias no total.', need:1500, prog:function(s){return totalDailyTasksDone(s);} },
-  { id:'missoes_t12', name:'Duas Mil Conquistas', color:'gold', icon:'check2', group:'Missões Totais',
-    desc:'Complete 2000 missões diárias no total.', need:2000, prog:function(s){return totalDailyTasksDone(s);} },
-  { id:'missoes_t13', name:'Lenda das Mil Batalhas', color:'gold', icon:'check2', group:'Missões Totais',
-    desc:'Complete 3000 missões diárias no total.', need:3000, prog:function(s){return totalDailyTasksDone(s);} },
+  tierSkills('xp','Riqueza de XP','gold','star', function(n){return 'Acumule '+n+' XP.';}, function(s){return s.totalXP;},
+    tiers([100,250,500,1000,1500,2000,3000,4000,5000,7500,10000,15000,20000,30000],
+      ['Primeiro Tesouro','Bolsa de XP','Cofre Crescente','Baú de Conhecimento','Fortuna em Ascensão','Tesouro Considerável','Cofre Reluzente','Fortuna do Códex','Tesouro Épico','Cofre Lendário','Fortuna Lendária','Tesouro Mítico','Riqueza Incalculável','Avatar da Fortuna'])),
 
-  { id:'seqperfeita_t0', name:'Dupla Perfeita', color:'gold', icon:'fire', group:'Sequência Perfeita',
-    desc:'Alcance 2 dias perfeitos seguidos.', need:2, prog:function(s){return perfectStreak(s);} },
-  { id:'seqperfeita_t1', name:'Trinca de Ouro', color:'gold', icon:'fire', group:'Sequência Perfeita',
-    desc:'Alcance 3 dias perfeitos seguidos.', need:3, prog:function(s){return perfectStreak(s);} },
-  { id:'seqperfeita_t2', name:'Sequência Brilhante', color:'gold', icon:'fire', group:'Sequência Perfeita',
-    desc:'Alcance 5 dias perfeitos seguidos.', need:5, prog:function(s){return perfectStreak(s);} },
-  { id:'seqperfeita_t3', name:'Semana Sem Falhas', color:'gold', icon:'fire', group:'Sequência Perfeita',
-    desc:'Alcance 7 dias perfeitos seguidos.', need:7, prog:function(s){return perfectStreak(s);} },
-  { id:'seqperfeita_t4', name:'Dez Dias de Glória', color:'gold', icon:'fire', group:'Sequência Perfeita',
-    desc:'Alcance 10 dias perfeitos seguidos.', need:10, prog:function(s){return perfectStreak(s);} },
-  { id:'seqperfeita_t5', name:'Quinze Dias Impecáveis', color:'gold', icon:'fire', group:'Sequência Perfeita',
-    desc:'Alcance 15 dias perfeitos seguidos.', need:15, prog:function(s){return perfectStreak(s);} },
-  { id:'seqperfeita_t6', name:'Vinte Dias de Fogo', color:'gold', icon:'fire', group:'Sequência Perfeita',
-    desc:'Alcance 20 dias perfeitos seguidos.', need:20, prog:function(s){return perfectStreak(s);} },
-  { id:'seqperfeita_t7', name:'Um Mês Sem Falhas', color:'gold', icon:'fire', group:'Sequência Perfeita',
-    desc:'Alcance 30 dias perfeitos seguidos.', need:30, prog:function(s){return perfectStreak(s);} },
-  { id:'seqperfeita_t8', name:'Quarenta e Cinco Dias de Ferro', color:'gold', icon:'fire', group:'Sequência Perfeita',
-    desc:'Alcance 45 dias perfeitos seguidos.', need:45, prog:function(s){return perfectStreak(s);} },
-  { id:'seqperfeita_t9', name:'Dois Meses Perfeitos', color:'gold', icon:'fire', group:'Sequência Perfeita',
-    desc:'Alcance 60 dias perfeitos seguidos.', need:60, prog:function(s){return perfectStreak(s);} },
-  { id:'seqperfeita_t10', name:'Trimestre Lendário', color:'gold', icon:'fire', group:'Sequência Perfeita',
-    desc:'Alcance 90 dias perfeitos seguidos.', need:90, prog:function(s){return perfectStreak(s);} },
+  tierSkills('missoes','Missões Totais','gold','check2', function(n){return 'Complete '+n+' missões diárias no total.';}, totalDailyTasksDone,
+    tiers([10,25,50,100,150,200,300,400,500,750,1000,1500,2000,3000],
+      ['Primeiras Missões','Aventureiro Ativo','Meio Centenar','Centena de Missões','Aventureiro Experiente','Duzentas Batalhas','Trezentas Conquistas','Veterano de Missões','Quinhentas Vitórias','Setecentas Jornadas','Milhar Histórico','Mil e Quinhentas Sagas','Duas Mil Conquistas','Lenda das Mil Batalhas'])),
 
-  { id:'extra_t0', name:'Primeiras Extras', color:'estudo', icon:'plus', group:'Tarefas Extras',
-    desc:'Complete 5 tarefas extras no total.', need:5, prog:function(s){return countCustomDone(s);} },
-  { id:'extra_t1', name:'Hábito Extra', color:'estudo', icon:'plus', group:'Tarefas Extras',
-    desc:'Complete 10 tarefas extras no total.', need:10, prog:function(s){return countCustomDone(s);} },
-  { id:'extra_t2', name:'Rotina Personalizada', color:'estudo', icon:'plus', group:'Tarefas Extras',
-    desc:'Complete 20 tarefas extras no total.', need:20, prog:function(s){return countCustomDone(s);} },
-  { id:'extra_t3', name:'Mestre das Extras', color:'estudo', icon:'plus', group:'Tarefas Extras',
-    desc:'Complete 30 tarefas extras no total.', need:30, prog:function(s){return countCustomDone(s);} },
-  { id:'extra_t4', name:'Lenda das Tarefas Extras', color:'estudo', icon:'plus', group:'Tarefas Extras',
-    desc:'Complete 50 tarefas extras no total.', need:50, prog:function(s){return countCustomDone(s);} },
-];
+  tierSkills('seqperfeita','Sequência Perfeita','gold','fire', function(n){return 'Alcance '+n+' dias perfeitos seguidos.';}, perfectStreak,
+    tiers([2,3,5,7,10,15,20,30,45,60,90],
+      ['Dupla Perfeita','Trinca de Ouro','Sequência Brilhante','Semana Sem Falhas','Dez Dias de Glória','Quinze Dias Impecáveis','Vinte Dias de Fogo','Um Mês Sem Falhas','Quarenta e Cinco Dias de Ferro','Dois Meses Perfeitos','Trimestre Lendário'])),
+
+  tierSkills('extra','Tarefas Extras','estudo','plus', function(n){return 'Complete '+n+' tarefas extras no total.';}, countCustomDone,
+    tiers([5,10,20,30,50], ['Primeiras Extras','Hábito Extra','Rotina Personalizada','Mestre das Extras','Lenda das Tarefas Extras']))
+).reduce(function(flat, group){ return flat.concat(group); }, []);
 
 var SKILL_GROUPS = ['Estudo','Leitura','Boxe','Academia','Corrida','Trilha de Estudo','Itens de Estudo','Mapa de Backend','Itens de Backend','Carreira','Diário de Bordo','Dias Perfeitos','Ascensão de Nível','Riqueza de XP','Missões Totais','Sequência Perfeita','Tarefas Extras'];
 var CATS = {
@@ -906,7 +901,7 @@ var NAV = [
   {id:'habilidades', label:'Habilidades', icon:'star'},
   {id:'diario', label:'Diário', icon:'feather'},
   {id:'empregabilidade', label:'Carreira', icon:'briefcase'},
-  {id:'comunidade', label:'Comunidade', icon:'users'}
+  {id:'configuracoes', label:'Configurações', icon:'settings'}
 ];
 
 /* ================= COMUNIDADE (Firebase — opcional) =================
@@ -1105,11 +1100,8 @@ function normalizeLoadedState(loaded){
 
   if(!normalized.taskLog) normalized.taskLog = {};
   if(!normalized.customTasks) normalized.customTasks = [];
-  if(!normalized.friends) normalized.friends = [];
   if(!normalized.diary) normalized.diary = [];
   if(!normalized.diaryAwarded) normalized.diaryAwarded = {};
-  if(!normalized.monthlyXP) normalized.monthlyXP = {};
-  if(!normalized.winHistory) normalized.winHistory = [];
   if(!Array.isArray(normalized.todos)) normalized.todos = [];
   if(!normalized.employability){
     normalized.employability = DEFAULT_EMPLOYABILITY.map(function(t,i){
@@ -1152,130 +1144,6 @@ function updateCloudBadge(){
     el.innerHTML = icon('cloud')+' '+info.text;
   });
 }
-var community = { profiles:{}, cheers:[], loading:false, error:null, sendOpenFor:null, justSent:null };
-
-function genCode(){
-  var chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789', out='';
-  for(var i=0;i<6;i++){ out += chars[Math.floor(Math.random()*chars.length)]; }
-  return out;
-}
-function ensureMyCode(persist){
-  if(!state.myCode){
-    state.myCode = genCode();
-    // Durante a inicialização, persist=false evita sobrescrever a nuvem
-    // antes de comparar qual versão é a mais recente.
-    if(persist !== false) saveState();
-  }
-  return state.myCode;
-}
-function prevMonthKey(mk){
-  var parts = mk.split('-').map(Number), y=parts[0], m=parts[1]-1;
-  if(m<1){ m=12; y--; }
-  return y+'-'+('0'+m).slice(-2);
-}
-function myPublicStats(){
-  var streaks = {};
-  Object.keys(CATS).forEach(function(k){ streaks[k] = streakFor(state,k); });
-  var mk = monthKey(), pmk = prevMonthKey(mk);
-  return {
-    name: state.myName || 'Aventureiro-Dev',
-    level: level(),
-    title: titleForLevel(level()),
-    xp: state.totalXP,
-    perfectDays: countPerfectDays(state),
-    streaks: streaks,
-    monthKey: mk,
-    monthlyXP: state.monthlyXP[mk] || 0,
-    prevMonthKey: pmk,
-    prevMonthXP: state.monthlyXP[pmk] || 0,
-    monthlyWins: state.monthlyWins || 0,
-    categoryCounts: monthlyCategoryCounts(state, mk),
-    updatedAt: Date.now()
-  };
-}
-function publishMyProfile(){
-  if(!firebaseReady || !db || !state.myName) return;
-  var code = ensureMyCode();
-  db.collection('profiles').doc(code).set(myPublicStats(), { merge:true }).catch(function(){});
-}
-async function refreshCommunity(){
-  if(!firebaseReady || !db) return;
-  community.loading = true; community.error = null; render();
-  try{
-    var myCode = ensureMyCode();
-    var jobs = state.friends.map(function(code){
-      return db.collection('profiles').doc(code).get().then(function(doc){
-        community.profiles[code] = doc.exists ? doc.data() : null;
-      }).catch(function(){ community.profiles[code] = null; });
-    });
-    var cheersJob = db.collection('profiles').doc(myCode).collection('cheers')
-      .orderBy('ts','desc').limit(12).get().then(function(qs){
-        community.cheers = qs.docs.map(function(d){ return d.data(); });
-      }).catch(function(){ community.cheers = []; });
-    await Promise.all(jobs.concat([cheersJob]));
-    checkMonthlyCrown();
-  }catch(e){
-    community.error = 'Não foi possível carregar a comunidade agora.';
-  }
-  community.loading = false;
-  render();
-}
-
-function friendXPForMonth(profile, mk){
-  if(!profile) return null;
-  if(profile.monthKey === mk) return profile.monthlyXP || 0;
-  if(profile.prevMonthKey === mk) return profile.prevMonthXP || 0;
-  return null;
-}
-
-function checkMonthlyCrown(){
-  var currentMk = monthKey();
-  if(state.lastMonthCheck === currentMk) return;
-  var endedMonth = state.lastMonthCheck;
-  var myXP = state.monthlyXP[endedMonth] || 0;
-  var best = { code:'__me__', xp: myXP };
-  state.friends.forEach(function(code){
-    var xp = friendXPForMonth(community.profiles[code], endedMonth);
-    if(xp !== null && xp > best.xp){ best = { code:code, xp:xp }; }
-  });
-  if(best.xp > 0 && best.code === '__me__'){
-    state.monthlyWins = (state.monthlyWins||0) + 1;
-    state.winHistory.unshift({ month: endedMonth, xp: myXP });
-    monthlyWinMessage = 'Você foi eleito(a) o Melhor do Mês de '+monthLabel(endedMonth)+'! 🏆';
-  }
-  state.lastMonthCheck = currentMk;
-  saveState();
-  publishMyProfile();
-}
-function addFriend(code){
-  code = (code||'').trim().toUpperCase();
-  if(!code || code.length<4) return;
-  if(code === state.myCode){ return; }
-  if(state.friends.indexOf(code)===-1){
-    state.friends.push(code);
-    saveState(); render();
-    refreshCommunity();
-  }
-}
-function removeFriend(code){
-  state.friends = state.friends.filter(function(c){ return c!==code; });
-  delete community.profiles[code];
-  saveState(); render();
-}
-var CHEER_MESSAGES = ['Continue firme! 💪','Você inspira! 🔥','Foco total, guerreiro(a)!','Cada passo conta — seguimos juntos!'];
-function sendCheer(code, message){
-  if(!firebaseReady || !db) return;
-  db.collection('profiles').doc(code).collection('cheers').add({
-    from: state.myName || 'Um(a) colega de jornada',
-    message: message,
-    ts: Date.now()
-  }).then(function(){
-    community.sendOpenFor = null;
-    community.justSent = code;
-    render();
-  }).catch(function(){});
-}
-
 /* ================= ARMAZENAMENTO (Claude Artifacts ou navegador comum) ================= */
 var hasClaudeStorage = (typeof window.storage !== 'undefined' && window.storage && typeof window.storage.get === 'function');
 
@@ -1302,8 +1170,6 @@ var state = null;
 var activeTab = 'hoje';
 var openPhase = 0;
 var penaltyMessage = null;
-var monthlyWinMessage = null;
-var editingName = false;
 
 /* ---- Pomodoro (estado só em memória, não persiste no state salvo) ---- */
 var pomodoro = { workMin:25, breakMin:5, secondsLeft:25*60, mode:'foco', running:false, cycles:0 };
@@ -1367,20 +1233,8 @@ function fmt(d){
   var y=d.getFullYear(), m=('0'+(d.getMonth()+1)).slice(-2), day=('0'+d.getDate()).slice(-2);
   return y+'-'+m+'-'+day;
 }
-function monthKey(d){
-  d = d || new Date();
-  return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2);
-}
-var MONTH_NAMES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-function monthLabel(mk){
-  var parts = mk.split('-');
-  return MONTH_NAMES[parseInt(parts[1],10)-1]+'/'+parts[0];
-}
 function addXP(amount){
   state.totalXP += amount;
-  var mk = monthKey();
-  state.monthlyXP[mk] = (state.monthlyXP[mk]||0) + amount;
-  if(state.monthlyXP[mk] < 0) state.monthlyXP[mk] = 0;
 }
 function defaultState(){
   return {
@@ -1394,13 +1248,6 @@ function defaultState(){
     diaryAwarded: {},
     todos: [],
     lastPenaltyCheck: todayKey(),
-    myCode: null,
-    myName: '',
-    friends: [],
-    monthlyXP: {},
-    monthlyWins: 0,
-    winHistory: [],
-    lastMonthCheck: monthKey(),
     /* IMPORTANTE: updatedAt começa em 0 (e não Date.now()) de propósito.
        Um estado padrão/vazio precisa SEMPRE parecer mais "antigo" do que
        qualquer estado real salvo na nuvem. Se aqui fosse Date.now(), toda
@@ -1433,10 +1280,6 @@ async function loadState(){
   }
 
   if(!state.lastPenaltyCheck) state.lastPenaltyCheck = todayKey();
-  if(!state.lastMonthCheck) state.lastMonthCheck = monthKey();
-
-  // Não grava ainda: primeiro comparamos o estado local com o estado na nuvem.
-  ensureMyCode(false);
 
   var penaltyResult = processMissedDays();
   if(penaltyResult.days>0){
@@ -1556,24 +1399,6 @@ function countDone(s, cat){
   var n=0;
   for(var k in s.taskLog){ if(s.taskLog[k] && s.taskLog[k][cat]) n++; }
   return n;
-}
-function monthlyCategoryCounts(s, mk){
-  var counts = {};
-  Object.keys(CATS).forEach(function(k){ counts[k]=0; });
-  for(var key in s.taskLog){
-    if(key.slice(0,7) !== mk) continue;
-    var log = s.taskLog[key];
-    Object.keys(CATS).forEach(function(k){ if(log && log[k]) counts[k]++; });
-  }
-  return counts;
-}
-function bestHabitOf(counts){
-  var best = null;
-  Object.keys(CATS).forEach(function(k){
-    var v = (counts && counts[k]) || 0;
-    if(v>0 && (!best || v>best.count)){ best = { cat:k, count:v }; }
-  });
-  return best;
 }
 function phaseComplete(s, idx){
   var arr = s.javaProgress[idx];
@@ -1728,17 +1553,44 @@ function clearDoneTodos(){
 function afterChange(){
   if(state.totalXP<0) state.totalXP = 0;
   saveState();
-  publishMyProfile();
   render();
 }
 async function resetAll(){
   if(!confirm('Isso apaga todo o seu progresso da campanha. Tem certeza?')) return;
   state = defaultState();
   state.updatedAt = Date.now();
-  ensureMyCode();
   await saveState();
   startCloudListener();
   render();
+}
+
+/* ---- Backup manual (exportar/importar um arquivo .json com todo o progresso) ---- */
+function exportBackup(){
+  var payload = JSON.stringify(state, null, 2);
+  var blob = new Blob([payload], { type:'application/json' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'campanha-backup-'+todayKey()+'.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+function importBackupFile(file){
+  if(!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e){
+    var parsed;
+    try{ parsed = JSON.parse(e.target.result); }
+    catch(err){ alert('Arquivo inválido. Verifique se é um backup exportado por este app.'); return; }
+    if(!confirm('Isso vai substituir todo o seu progresso atual pelo backup importado. Continuar?')) return;
+    state = normalizeLoadedState(parsed);
+    state.updatedAt = Date.now();
+    saveState();
+    render();
+  };
+  reader.readAsText(file);
 }
 
 /* ================= RENDER ================= */
@@ -1822,7 +1674,7 @@ function renderTab(){
   if(activeTab==='habilidades') return renderHabilidades();
   if(activeTab==='diario') return renderDiario();
   if(activeTab==='empregabilidade') return renderEmpregabilidade();
-  if(activeTab==='comunidade') return renderComunidade();
+  if(activeTab==='configuracoes') return renderConfiguracoes();
   return '';
 }
 
@@ -1857,9 +1709,6 @@ function renderHoje(){
 
   var customIds = state.customTasks.map(function(t){return t.id;});
   var allDone = cats.length+customIds.length>0 && cats.every(function(c){return log[c];}) && customIds.every(function(id){return log.custom && log.custom[id];});
-  if(monthlyWinMessage){
-    html += '<div class="banner">'+icon('trophy')+' '+esc(monthlyWinMessage)+'<button class="close" id="dismissMonthlyWin">✕</button></div>';
-  }
   if(penaltyMessage){
     html += '<div class="banner warn">'+icon('trash')+' '+esc(penaltyMessage)+'<button class="close" id="dismissPenalty">✕</button></div>';
   }
@@ -2042,278 +1891,29 @@ function renderDiario(){
   return html;
 }
 
-function streakChipsFor(streaks){
-  return Object.keys(CATS).map(function(k){
-    var c = CATS[k], v = (streaks && streaks[k]) || 0;
-    return '<span class="mini-chip" style="background:var(--'+c.color+'-bg);color:var(--'+c.color+')">'+icon(c.icon)+' '+v+'d</span>';
-  }).join('');
-}
+function renderConfiguracoes(){
+  var html = '<div class="page-head"><span class="eyebrow">Preferências</span><h1>Configurações</h1></div>';
 
-function renderRankCard(opts){
-  var html = '<div class="card"><h3 style="margin-top:0;">'+icon(opts.icon)+' '+opts.heading+'</h3>';
-  if(opts.subtitle) html += '<p class="muted">'+opts.subtitle+'</p>';
-  if(!opts.rows.length){
-    html += '<div class="empty">'+(opts.emptyText||'Nada por aqui ainda.')+'</div></div>';
-    return html;
-  }
-  html += '<div class="quest-list">';
-  opts.rows.forEach(function(r,i){
-    var pos=i+1;
-    var medal = pos===1?'var(--gold)':pos===2?'#8FA0B3':pos===3?'#B4784A':'var(--ink-faint)';
-    var medalBg = pos===1?'var(--gold-bg)':pos<=3?'var(--card-soft)':'transparent';
-    html += '<div class="friend-row">'+
-      '<div style="display:flex;align-items:center;gap:12px;">'+
-        '<div class="rank-badge" style="color:'+medal+';background:'+medalBg+';border-color:'+medal+';">'+((pos===1 && r.crown) ? icon('trophy') : pos)+'</div>'+
-        '<div class="friend-info">'+
-          '<div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;">'+
-            '<span class="q-name">'+esc(r.name)+(r.isMe?' <span class="faint">(você)</span>':'')+'</span>'+
-            (r.subLabel? '<span class="faint mono">'+r.subLabel+'</span>' : '')+
-          '</div>'+
-        '</div>'+
-      '</div>'+
-      '<div class="mono" style="font-size:12.5px;color:var(--ink-soft);">'+r.valueText+'</div>'+
-    '</div>';
-  });
-  html += '</div></div>';
-  return html;
-}
-
-function renderRanking(){
-  var rows = [{ code:'__me__', isMe:true, data:myPublicStats() }];
-  state.friends.forEach(function(code){
-    var p = community.profiles[code];
-    if(p){ rows.push({ code:code, isMe:false, data:p }); }
-  });
-  rows.sort(function(a,b){ return (b.data.xp||0) - (a.data.xp||0); });
-  return renderRankCard({
-    icon:'trophy', heading:'Ranking da turma',
-    subtitle:'Não é sobre vencer ninguém — é só um retrato de quem está mantendo o ritmo. Use pra se inspirar, não pra se comparar.',
-    rows: rows.map(function(r){
-      return { name:r.data.name, isMe:r.isMe, subLabel:'nível '+r.data.level+' · '+esc(r.data.title), valueText:(r.data.xp||0)+' XP' };
-    })
-  });
-}
-
-function renderMonthlyRanking(){
-  var mk = monthKey();
-  var rows = [{ code:'__me__', isMe:true, data:myPublicStats() }];
-  state.friends.forEach(function(code){
-    var p = community.profiles[code];
-    var xp = friendXPForMonth(p, mk);
-    if(p && xp!==null){ rows.push({ code:code, isMe:false, data:p, xp:xp }); }
-  });
-  rows.forEach(function(r){ if(r.xp===undefined) r.xp = r.data.monthlyXP||0; });
-  rows.sort(function(a,b){ return b.xp - a.xp; });
-  return renderRankCard({
-    icon:'fire', heading:'Melhor do mês — '+monthLabel(mk)+' (em andamento)',
-    subtitle:'A apuração fecha quando o mês vira e alguém do grupo abre o app de novo. Ainda dá tempo de virar o jogo.',
-    rows: rows.map(function(r){
-      return { name:r.data.name, isMe:r.isMe, crown:true, subLabel:'nível '+r.data.level, valueText:r.xp+' XP no mês' };
-    }),
-    emptyText:'Ainda não há dados suficientes pra apurar o mês.'
-  });
-}
-
-function renderCategoryRanking(){
-  var people = [{ code:'__me__', isMe:true, data:myPublicStats() }];
-  state.friends.forEach(function(code){
-    var p = community.profiles[code];
-    if(p) people.push({ code:code, isMe:false, data:p });
-  });
-  var html = '<div class="card"><h3 style="margin-top:0;">'+icon('trophy')+' Ranking por Etapa</h3>'+
-    '<p class="muted">Quem está com a sequência mais forte em cada trilha, agora.</p>';
-  Object.keys(CATS).forEach(function(catKey){
-    var cat = CATS[catKey];
-    var rows = people.map(function(p){
-      var streak = (p.data.streaks && p.data.streaks[catKey]) || 0;
-      return { name:p.data.name, isMe:p.isMe, streak:streak };
-    }).filter(function(r){ return r.streak>0; })
-      .sort(function(a,b){ return b.streak-a.streak; });
-    html += '<h3 style="display:flex;align-items:center;gap:7px;font-size:13px;color:var(--'+cat.color+');margin:18px 0 6px;">'+icon(cat.icon)+' '+cat.label+'</h3>';
-    if(!rows.length){
-      html += '<div class="empty" style="padding:6px 0;">Ninguém em sequência ainda nessa trilha.</div>';
-    } else {
-      html += '<div class="quest-list">';
-      rows.forEach(function(r,i){
-        var pos=i+1;
-        html += '<div class="friend-row" style="padding:8px 6px;">'+
-          '<div style="display:flex;align-items:center;gap:10px;">'+
-            '<span class="faint mono" style="width:16px;">'+pos+'º</span>'+
-            '<span class="q-name" style="font-size:13px;">'+esc(r.name)+(r.isMe?' <span class="faint">(você)</span>':'')+'</span>'+
-          '</div>'+
-          '<span class="mono" style="font-size:12px;color:var(--ink-soft);">'+r.streak+' dia(s)</span>'+
-        '</div>';
-      });
-      html += '</div>';
-    }
-  });
-  html += '</div>';
-  return html;
-}
-
-function renderBestHabitMonth(){
-  var mk = monthKey();
-  var people = [{ code:'__me__', isMe:true, data:myPublicStats() }];
-  state.friends.forEach(function(code){
-    var p = community.profiles[code];
-    if(p) people.push({ code:code, isMe:false, data:p });
-  });
-  var rows = people.map(function(p){
-    var best = bestHabitOf(p.data.categoryCounts);
-    return { name:p.data.name, isMe:p.isMe, best:best };
-  }).filter(function(r){ return r.best; })
-    .sort(function(a,b){ return b.best.count - a.best.count; });
-  return renderRankCard({
-    icon:'fire', heading:'Melhor Hábito do Mês — '+monthLabel(mk),
-    subtitle:'O hábito que cada um mais praticou esse mês, olhando todas as trilhas.',
-    rows: rows.map(function(r){
-      var cat = CATS[r.best.cat];
-      return { name:r.name, isMe:r.isMe, subLabel:cat.label, valueText:r.best.count+'x este mês' };
-    }),
-    emptyText:'Ainda não há registros suficientes esse mês.'
-  });
-}
-
-function renderHallOfFame(){
-  var rows = [{ code:'__me__', isMe:true, name:state.myName||'Você', wins: state.monthlyWins||0 }];
-  state.friends.forEach(function(code){
-    var p = community.profiles[code];
-    if(p){ rows.push({ code:code, isMe:false, name:p.name, wins: p.monthlyWins||0 }); }
-  });
-  rows.sort(function(a,b){ return b.wins - a.wins; });
-  return renderRankCard({
-    icon:'star', heading:'Hall da Fama — Melhores do Mês',
-    subtitle:'Quantas vezes cada um já foi o destaque do mês na sua turma.',
-    rows: rows.map(function(r){
-      return { name:r.name, isMe:r.isMe, valueText:(r.wins===1?'1 vez':r.wins+' vezes') };
-    }),
-    emptyText:'Ninguém foi eleito o melhor do mês ainda — o próximo pode ser você.'
-  });
-}
-
-function renderCloudSyncCard(){
-  var html = '<div class="card"><h2>'+icon('cloud')+' Sincronização em tempo real</h2>'+
-    '<p class="muted">Toda alteração — missões marcadas, itens de estudo, projetos, diário, nome — é enviada automaticamente para o seu banco Firebase. Basta abrir este mesmo arquivo em qualquer outro navegador ou dispositivo: ele já sincroniza sozinho, sem precisar copiar nenhum código.</p>'+
+  html += '<div class="card"><h2>'+icon('cloud')+' Sincronização em tempo real</h2>'+
+    '<p class="muted">Toda alteração — missões marcadas, itens de estudo, projetos, diário — é enviada automaticamente para o seu banco Firebase. Basta abrir este mesmo arquivo em qualquer outro navegador ou dispositivo: ele sincroniza sozinho, sem precisar copiar nenhum código.</p>'+
     '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">'+
       '<span class="faint mono" id="cloudSyncBadgeCard">'+icon('cloud')+' '+cloudBadgeText()+'</span>'+
-    '</div>'+
-  '</div>';
-  return html;
-}
-
-function renderComunidade(){
-  var html = '<div class="page-head"><span class="eyebrow">Jornada Compartilhada</span><h1>Comunidade</h1></div>';
-
+    '</div>';
   if(!firebaseReady){
-    html += '<div class="card"><h2>'+icon('users')+' Configure a Comunidade</h2>'+
-      '<p class="muted">Essa aba precisa de um banco de dados gratuito (Firebase) pra funcionar entre dispositivos diferentes — algo que o GitHub Pages sozinho não oferece.</p>'+
-      '<ol style="padding-left:18px; font-size:13.5px; color:var(--ink-soft); line-height:1.9;">'+
-        '<li>Crie um projeto grátis em <b>console.firebase.google.com</b></li>'+
-        '<li>Ative o <b>Firestore Database</b> (modo produção)</li>'+
-        '<li>Em "Configurações do projeto → Seus apps", crie um app da Web e copie as chaves</li>'+
-        '<li>Cole as chaves no objeto <code class="mono">FIREBASE_CONFIG</code>, no início do arquivo HTML</li>'+
-        '<li>Configure as regras do Firestore conforme o arquivo firestore.rules</li>'+
-      '</ol>'+
-      '<p class="faint">Sem isso, o resto do app continua funcionando normalmente — só essa aba fica em espera.</p>'+
-    '</div>';
-    return html;
-  }
-
-  html += renderCloudSyncCard();
-
-  var showEditor = editingName || !state.myName;
-  var displayName = state.myName || 'Aventureiro-Dev';
-
-  html += '<div class="card"><h2>'+icon('users')+' Seu perfil público</h2>'+
-    '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">'+
-      '<div class="q-name" style="font-size:16px;" id="profileNamePreview">'+esc(displayName)+'</div>'+
-      (state.myName ? '<button class="btn ghost" id="renameBtn" style="font-size:11.5px;padding:6px 12px;">'+icon('feather')+' Renomear</button>' : '')+
-    '</div>';
-
-  if(showEditor){
-    html += '<div class="inline-form" style="margin-top:10px;">'+
-      '<input class="field" id="myNameInput" placeholder="Seu nome ou apelido" maxlength="24" value="'+esc(state.myName||'')+'"/>'+
-      '<button class="btn" id="saveNameBtn">Salvar</button>'+
-      (state.myName ? '<button class="btn ghost" id="cancelNameBtn">Cancelar</button>' : '')+
-    '</div>';
-  }
-  html += '<p class="muted" style="margin-top:10px;">Esse nome aparece pros seus amigos na comunidade.</p></div>';
-
-  if(!state.myName){ return html; }
-
-  var myCode = ensureMyCode();
-
-  html += '<div class="card">'+
-    '<h2>'+icon('send')+' Seu código de jornada</h2>'+
-    '<p class="muted">Compartilhe com quem você quer ter por perto. Quem tiver seu código pode te adicionar também.</p>'+
-    '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">'+
-      '<div class="mono" style="font-size:22px;font-weight:700;letter-spacing:0.12em;background:var(--card-soft);padding:8px 16px;border-radius:var(--radius-sm);border:1px solid var(--line-strong);">'+myCode+'</div>'+
-      '<button class="btn ghost" id="copyCodeBtn">'+icon('copy')+' Copiar</button>'+
-    '</div></div>';
-
-  html += '<div class="card"><h2>'+icon('users')+' Adicionar um companheiro</h2>'+
-    '<div class="inline-form"><input class="field" id="friendCodeInput" placeholder="Código do seu amigo (ex: A1B2C3)" maxlength="8"/>'+
-    '<button class="btn" id="addFriendBtn">Adicionar</button></div></div>';
-
-  html += '<div class="card"><h2>'+icon('users')+' Companheiros de jornada '+
-    '<button class="btn ghost" id="refreshCommunityBtn" style="margin-left:auto;font-size:11.5px;padding:6px 12px;">'+(community.loading?'Atualizando…':'Atualizar')+'</button></h2>';
-
-  if(!state.friends.length){
-    html += '<div class="empty">Você ainda não adicionou ninguém. Compartilhe seu código com um amigo ou peça o dele.</div>';
-  } else {
-    html += '<div class="quest-list">';
-    state.friends.forEach(function(code){
-      var p = community.profiles[code];
-      html += '<div class="friend-row">';
-      if(p===undefined){
-        html += '<div class="friend-info"><div class="q-name">'+code+'</div><div class="faint">Carregando…</div></div>';
-      } else if(p===null){
-        html += '<div class="friend-info"><div class="q-name">'+code+'</div><div class="faint">Perfil não encontrado.</div></div>'+
-          '<button class="q-del" data-remove-friend="'+code+'">'+icon('trash')+'</button>';
-      } else {
-        html += '<div class="friend-info">'+
-          '<div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;">'+
-            '<span class="q-name">'+esc(p.name)+'</span>'+
-            '<span class="faint mono">nível '+p.level+' · '+esc(p.title)+'</span>'+
-          '</div>'+
-          '<div class="mini-chip-row">'+streakChipsFor(p.streaks)+'</div>'+
-        '</div>'+
-        '<div style="display:flex;align-items:center;gap:6px;">'+
-          '<button class="btn ghost" data-cheer-open="'+code+'" style="font-size:11.5px;padding:7px 11px;">'+icon('send')+' Apoiar</button>'+
-          '<button class="q-del" data-remove-friend="'+code+'">'+icon('trash')+'</button>'+
-        '</div>';
-      }
-      html += '</div>';
-      if(community.sendOpenFor===code){
-        html += '<div class="cheer-panel">'+ CHEER_MESSAGES.map(function(m){
-          return '<button class="chip" data-cheer-send="'+code+'|'+esc(m)+'">'+esc(m)+'</button>';
-        }).join('') + '</div>';
-      }
-      if(community.justSent===code){
-        html += '<div class="rule-note" style="color:var(--academia);background:var(--academia-bg);">'+icon('fire')+' Apoio enviado!</div>';
-      }
-    });
-    html += '</div>';
-  }
-  if(community.error){ html += '<p class="faint" style="color:var(--danger);">'+esc(community.error)+'</p>'; }
-  html += '</div>';
-
-  html += renderMonthlyRanking();
-  html += renderBestHabitMonth();
-  html += renderCategoryRanking();
-  html += renderRanking();
-  html += renderHallOfFame();
-
-  html += '<div class="card"><h3 style="margin-top:0;">'+icon('fire')+' Apoios recebidos</h3>';
-  if(!community.cheers.length){
-    html += '<div class="empty">Ninguém te mandou um aceno ainda — tudo bem, continue no seu ritmo.</div>';
-  } else {
-    community.cheers.forEach(function(c){
-      html += '<div class="diary-entry"><div class="d-icon" style="background:var(--gold-bg);color:var(--gold);">'+icon('fire')+'</div>'+
-        '<div><div class="d-date">de '+esc(c.from)+'</div><p>'+esc(c.message)+'</p></div></div>';
-    });
+    html += '<p class="faint" style="margin-top:10px;">A nuvem não está configurada neste arquivo — seu progresso continua salvo localmente neste navegador, mas não sincroniza entre dispositivos até o Firebase ser configurado (veja os comentários no início do código-fonte).</p>';
   }
   html += '</div>';
+
+  html += '<div class="card"><h2>'+icon('download')+' Backup manual</h2>'+
+    '<p class="muted">Exporte um arquivo com todo o seu progresso (missões, estudo, diário, XP) para guardar em outro lugar, ou restaure a partir de um backup salvo anteriormente.</p>'+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;">'+
+      '<button class="btn" id="exportBackupBtn">'+icon('download')+' Exportar backup</button>'+
+      '<label class="btn ghost" style="cursor:pointer;">'+icon('upload')+' Importar backup'+
+        '<input type="file" accept="application/json" id="importBackupInput" style="display:none;"/>'+
+      '</label>'+
+    '</div>'+
+    '<p class="faint" style="margin-top:10px;">Importar substitui todo o progresso atual pelo conteúdo do arquivo — use com cuidado.</p>'+
+  '</div>';
 
   return html;
 }
@@ -2339,7 +1939,6 @@ function bindEvents(){
     el.addEventListener('click', function(){
       activeTab = el.getAttribute('data-tab');
       render();
-      if(activeTab==='comunidade' && firebaseReady && state.myName){ publishMyProfile(); refreshCommunity(); }
     });
   });
   app.querySelectorAll('[data-toggle]').forEach(function(el){
@@ -2387,57 +1986,15 @@ function bindEvents(){
   bindClick('pomodoroResetBtn', pomodoroReset);
   bindClick('pomodoroSkipBtn', pomodoroSkip);
   bindClick('dismissPenalty', function(){ penaltyMessage = null; render(); });
-  bindClick('dismissMonthlyWin', function(){ monthlyWinMessage = null; render(); });
 
-  bindClick('saveNameBtn', function(){
-    var v = byId('myNameInput').value.trim();
-    if(!v) return;
-    state.myName = v.slice(0,24);
-    editingName = false;
-    ensureMyCode();
-    saveState();
-    publishMyProfile();
-    refreshCommunity();
-    render();
-  });
-  bindEnter('myNameInput', function(v){ byId('saveNameBtn') && byId('saveNameBtn').click(); });
-  bindClick('renameBtn', function(){ editingName = true; render(); });
-  bindClick('cancelNameBtn', function(){ editingName = false; render(); });
-  (function(){
-    var nameInputEl = byId('myNameInput');
-    if(nameInputEl){
-      nameInputEl.addEventListener('input', function(){
-        var preview = byId('profileNamePreview');
-        if(preview) preview.textContent = nameInputEl.value.trim() || 'Aventureiro-Dev';
-      });
-    }
-  })();
-
-  bindClick('copyCodeBtn', function(){
-    var code = state.myCode || '';
-    if(navigator.clipboard){ navigator.clipboard.writeText(code).catch(function(){}); }
-  });
-  bindClick('addFriendBtn', function(){ addFriend(byId('friendCodeInput').value); });
-  bindEnter('friendCodeInput', function(v){ addFriend(v); });
-
-  bindClick('refreshCommunityBtn', refreshCommunity);
-
-  app.querySelectorAll('[data-remove-friend]').forEach(function(el){
-    el.addEventListener('click', function(){ removeFriend(el.getAttribute('data-remove-friend')); });
-  });
-  app.querySelectorAll('[data-cheer-open]').forEach(function(el){
-    el.addEventListener('click', function(){
-      var code = el.getAttribute('data-cheer-open');
-      community.sendOpenFor = (community.sendOpenFor===code) ? null : code;
-      render();
+  bindClick('exportBackupBtn', exportBackup);
+  var importInputEl = byId('importBackupInput');
+  if(importInputEl){
+    importInputEl.addEventListener('change', function(e){
+      importBackupFile(e.target.files[0]);
+      e.target.value = '';
     });
-  });
-  app.querySelectorAll('[data-cheer-send]').forEach(function(el){
-    el.addEventListener('click', function(){
-      var parts = el.getAttribute('data-cheer-send').split('|');
-      sendCheer(parts[0], parts[1]);
-    });
-  });
+  }
 
   bind3DTilt();
 }
