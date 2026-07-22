@@ -939,6 +939,451 @@ body{ min-height:100dvh; }
   .news-language-toggle button{ flex:1; }
 }
 
+
+/* ---------------- modal de níveis ---------------- */
+.level-card,
+.hero-ring,
+.mobile-top .ring{
+  cursor:pointer;
+}
+.level-modal{
+  position:fixed;
+  inset:0;
+  z-index:12000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  background:rgba(12,26,42,.55);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+}
+.level-modal-panel{
+  width:min(720px,100%);
+  max-height:min(82dvh,760px);
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  background:var(--paper);
+  border:1px solid rgba(255,255,255,.65);
+  border-radius:22px;
+  box-shadow:0 30px 80px rgba(8,24,42,.35);
+}
+.level-modal-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:14px;
+  padding:20px;
+  background:var(--card);
+  border-bottom:1px solid var(--line-strong);
+}
+.level-modal-head h2{
+  margin:0;
+  font-family:'Fraunces',serif;
+  font-size:22px;
+}
+.level-modal-head p{
+  margin:5px 0 0;
+  color:var(--ink-soft);
+  font-size:12.5px;
+}
+.level-modal-close{
+  width:38px;
+  height:38px;
+  flex:none;
+  border:1px solid var(--line-strong);
+  border-radius:11px;
+  background:var(--card-soft);
+  color:var(--ink);
+  cursor:pointer;
+  font-size:20px;
+}
+.level-list{
+  overflow-y:auto;
+  padding:14px;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:9px;
+}
+.level-item{
+  display:grid;
+  grid-template-columns:46px minmax(0,1fr) auto;
+  align-items:center;
+  gap:11px;
+  padding:11px;
+  border:1px solid var(--line-strong);
+  border-radius:13px;
+  background:var(--card);
+}
+.level-item.current{
+  border-color:var(--gold);
+  box-shadow:0 0 0 2px var(--gold-bg) inset;
+}
+.level-item.completed{
+  background:var(--card-soft);
+}
+.level-number{
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:var(--ink);
+  color:var(--paper);
+  font:700 14px 'JetBrains Mono',monospace;
+}
+.level-item.current .level-number{
+  background:var(--gold);
+}
+.level-item-title{
+  font-family:'Fraunces',serif;
+  font-weight:600;
+  font-size:13.5px;
+}
+.level-item-xp{
+  margin-top:3px;
+  color:var(--ink-faint);
+  font:500 10px 'JetBrains Mono',monospace;
+}
+.level-status{
+  font-size:10px;
+  font-weight:700;
+  color:var(--ink-faint);
+  white-space:nowrap;
+}
+.level-item.current .level-status{
+  color:var(--gold);
+}
+@media(max-width:560px){
+  .level-modal{
+    align-items:flex-end;
+    padding:0;
+  }
+  .level-modal-panel{
+    width:100%;
+    max-height:88dvh;
+    border-radius:22px 22px 0 0;
+  }
+  .level-list{
+    grid-template-columns:1fr;
+    padding:10px;
+  }
+  .level-modal-head{
+    padding:17px 15px;
+  }
+}
+
+
+.level-tabs{
+  display:flex;
+  gap:7px;
+  padding:12px 14px 0;
+  overflow-x:auto;
+  scrollbar-width:none;
+}
+.level-tabs::-webkit-scrollbar{ display:none; }
+.level-tab{
+  flex:none;
+  border:1px solid var(--line-strong);
+  background:var(--card-soft);
+  color:var(--ink-soft);
+  border-radius:999px;
+  padding:8px 12px;
+  font:700 11px 'Inter',sans-serif;
+  cursor:pointer;
+}
+.level-tab.active{
+  background:var(--ink);
+  color:var(--paper);
+  border-color:var(--ink);
+}
+.level-track-summary{
+  margin:12px 14px 0;
+  padding:12px 14px;
+  border:1px solid var(--line-strong);
+  border-radius:13px;
+  background:var(--card-soft);
+  color:var(--ink-soft);
+  font-size:12px;
+}
+.level-track-summary strong{ color:var(--ink); }
+
+
+/* ================= DASHBOARD DE NÍVEIS ================= */
+.level-modal-panel{
+  width:min(980px,100%);
+  max-height:min(92dvh,900px);
+}
+.level-dashboard{
+  overflow-y:auto;
+  padding:16px;
+}
+.level-dashboard-tabs{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:8px;
+  padding:8px;
+  margin-bottom:14px;
+  background:var(--card-soft);
+  border:1px solid var(--line-strong);
+  border-radius:16px;
+}
+.level-dashboard-tab{
+  min-height:54px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  border:1px solid var(--line-strong);
+  border-radius:12px;
+  background:var(--card);
+  color:var(--ink);
+  font:700 12px 'Inter',sans-serif;
+  cursor:pointer;
+  transition:.18s ease;
+}
+.level-dashboard-tab:hover{
+  transform:translateY(-1px);
+  box-shadow:var(--shadow-sm);
+}
+.level-dashboard-tab.active{
+  background:var(--ink);
+  color:var(--paper);
+  border-color:var(--ink);
+  box-shadow:var(--shadow-sm);
+}
+.level-dashboard-tab .tab-icon{
+  font-size:18px;
+}
+.level-overview{
+  display:grid;
+  grid-template-columns:170px minmax(0,1fr) 235px;
+  gap:16px;
+  align-items:center;
+  padding:18px;
+  background:linear-gradient(135deg,var(--card),var(--card-soft));
+  border:1px solid var(--line-strong);
+  border-radius:18px;
+  box-shadow:var(--shadow-sm);
+}
+.level-badge-large{
+  width:145px;
+  height:145px;
+  margin:auto;
+  border-radius:50%;
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:conic-gradient(var(--gold) var(--level-progress,0%),var(--line-strong) 0);
+}
+.level-badge-large::before{
+  content:"";
+  position:absolute;
+  inset:10px;
+  border-radius:50%;
+  background:var(--paper);
+  border:1px solid var(--line-strong);
+}
+.level-badge-core{
+  position:relative;
+  z-index:1;
+  text-align:center;
+}
+.level-badge-core small{
+  display:block;
+  color:var(--ink-faint);
+  font:700 9px 'JetBrains Mono',monospace;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+}
+.level-badge-core strong{
+  display:block;
+  color:var(--ink);
+  font:700 38px 'Fraunces',serif;
+  line-height:1;
+  margin:4px 0;
+}
+.level-badge-core span{
+  display:block;
+  max-width:110px;
+  color:var(--gold);
+  font:700 10px 'Inter',sans-serif;
+}
+.level-overview-main h3{
+  margin:0 0 6px;
+  color:var(--ink);
+  font:700 22px 'Fraunces',serif;
+}
+.level-overview-main .current-title{
+  color:var(--ink-soft);
+  font-size:13px;
+  margin-bottom:16px;
+}
+.level-progress-numbers{
+  display:flex;
+  align-items:flex-end;
+  gap:7px;
+  margin-bottom:9px;
+}
+.level-progress-numbers strong{
+  color:var(--ink);
+  font:700 28px 'Fraunces',serif;
+}
+.level-progress-numbers span{
+  color:var(--ink-faint);
+  font-size:13px;
+  padding-bottom:3px;
+}
+.level-progress-bar{
+  height:10px;
+  overflow:hidden;
+  border-radius:999px;
+  background:var(--line-strong);
+}
+.level-progress-bar > span{
+  display:block;
+  height:100%;
+  border-radius:inherit;
+  background:linear-gradient(90deg,var(--gold),var(--ink));
+}
+.level-progress-help{
+  margin-top:10px;
+  color:var(--ink-soft);
+  font-size:12px;
+}
+.level-next-card{
+  padding:15px;
+  background:var(--paper);
+  border:1px solid var(--line-strong);
+  border-radius:14px;
+}
+.level-next-card .eyebrow{
+  color:var(--gold);
+  font:700 10px 'JetBrains Mono',monospace;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+.level-next-card h4{
+  margin:8px 0 5px;
+  color:var(--ink);
+  font:700 16px 'Fraunces',serif;
+}
+.level-next-card p{
+  margin:0;
+  color:var(--ink-soft);
+  font-size:11.5px;
+}
+.level-summary-grid{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:10px;
+  margin-top:14px;
+}
+.level-summary-card{
+  padding:14px;
+  background:var(--card);
+  border:1px solid var(--line-strong);
+  border-radius:14px;
+}
+.level-summary-card.active{
+  border-color:var(--gold);
+  box-shadow:0 0 0 2px var(--gold-bg) inset;
+}
+.level-summary-card .summary-icon{
+  font-size:22px;
+}
+.level-summary-card .summary-name{
+  margin-top:8px;
+  color:var(--ink-soft);
+  font:700 11px 'Inter',sans-serif;
+}
+.level-summary-card .summary-level{
+  margin:4px 0;
+  color:var(--ink);
+  font:700 20px 'Fraunces',serif;
+}
+.level-summary-card .summary-title{
+  min-height:30px;
+  color:var(--ink-faint);
+  font-size:10.5px;
+  line-height:1.35;
+}
+.level-summary-card .mini-bar{
+  height:6px;
+  margin-top:10px;
+  overflow:hidden;
+  border-radius:999px;
+  background:var(--line-strong);
+}
+.level-summary-card .mini-bar span{
+  display:block;
+  height:100%;
+  border-radius:inherit;
+  background:var(--gold);
+}
+.level-list-section{
+  margin-top:16px;
+}
+.level-list-section h3{
+  margin:0 0 10px;
+  color:var(--ink);
+  font:700 18px 'Fraunces',serif;
+}
+.level-list{
+  padding:0;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+}
+@media(max-width:800px){
+  .level-dashboard-tabs{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+  .level-overview{
+    grid-template-columns:140px 1fr;
+  }
+  .level-next-card{
+    grid-column:1/-1;
+  }
+  .level-summary-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+@media(max-width:560px){
+  .level-dashboard{
+    padding:10px;
+  }
+  .level-dashboard-tabs{
+    display:flex;
+    overflow-x:auto;
+    grid-template-columns:none;
+    scrollbar-width:none;
+  }
+  .level-dashboard-tabs::-webkit-scrollbar{display:none;}
+  .level-dashboard-tab{
+    flex:0 0 auto;
+    min-width:105px;
+  }
+  .level-overview{
+    grid-template-columns:1fr;
+    text-align:center;
+    padding:15px;
+  }
+  .level-overview-main{
+    text-align:left;
+  }
+  .level-next-card{
+    text-align:left;
+  }
+  .level-summary-grid{
+    grid-template-columns:1fr 1fr;
+  }
+  .level-list{
+    grid-template-columns:1fr;
+  }
+}
+
 </style>
 
 <div class="rpg-root">
@@ -1672,10 +2117,329 @@ function titleForLevel(lv){
   if(lv<3) return 'Aprendiz Arcano do Hello World';
   if(lv<6) return 'Escudeiro do Loop';
   if(lv<10) return 'Caçador de Bugs';
-  if(lv<15) return 'Cavaleiro do Merge Conflict';
-  if(lv<20) return 'Arquimago da Arquitetura';
-  return 'Lenda do Deploy em Produção';
+  if(lv<15) return 'Mestre das Funções';
+  if(lv<20) return 'Cavaleiro do Merge Conflict';
+  if(lv<25) return 'Guardião dos Algoritmos';
+  if(lv<30) return 'Arquiteto de Sistemas';
+  if(lv<35) return 'Mestre da Automação';
+  if(lv<40) return 'Estrategista Digital';
+  if(lv<45) return 'Diretor de Tecnologia';
+  if(lv<50) return 'Visionário da Inovação';
+  return '👑 CEO Visionário';
 }
+
+var activeLevelTrack = 'geral';
+
+var ACTIVITY_LEVELS = {
+  leitura:{
+    label:'Leitura',
+    unit:'dias de leitura',
+    icon:'📚',
+    titles:[
+      'Leitor Iniciante','Explorador de Páginas','Caçador de Histórias','Aprendiz das Palavras','Guardião dos Livros',
+      'Leitor Persistente','Descobridor de Ideias','Viajante Literário','Colecionador de Histórias','Mestre das Páginas',
+      'Sábio das Palavras','Intérprete de Narrativas','Leitor Estratégico','Guardião do Conhecimento','Especialista em Leitura',
+      'Bibliotecário Arcano','Erudito Iniciante','Mentor das Palavras','Analista de Grandes Obras','Mestre da Compreensão',
+      'Sábio das Bibliotecas','Leitor de Elite','Curador de Conhecimento','Arquivista das Ideias','Especialista Literário',
+      'Mestre das Grandes Obras','Guardião da Sabedoria','Erudito das Histórias','Visionário Literário','Mestre do Conhecimento',
+      'Sábio Supremo','Lenda das Páginas','Grande Mentor Literário','Arquimago das Palavras','Mestre da Cultura',
+      'Guardião das Grandes Ideias','Erudito Visionário','Conselheiro das Bibliotecas','Lenda do Conhecimento','Mestre da Sabedoria',
+      'Sábio Lendário','Imortal das Letras','Oráculo das Palavras','Grande Mestre Literário','Guardião Supremo dos Livros',
+      'Visionário das Ideias','Lenda das Grandes Obras','Mestre Universal da Leitura','Imperador do Conhecimento','👑 CEO da Sabedoria'
+    ]
+  },
+  boxe:{
+    label:'Boxe',
+    unit:'sessões de boxe',
+    icon:'🥊',
+    titles:[
+      'Novato do Ringue','Aprendiz do Jab','Guardião da Base','Guerreiro da Guarda','Explorador de Combinações',
+      'Punho Iniciante','Discípulo da Esquiva','Caçador de Reflexos','Lutador Persistente','Mestre do Jab',
+      'Especialista em Diretos','Guerreiro das Combinações','Guardião do Footwork','Punho de Ferro','Lutador Estratégico',
+      'Mestre da Defesa','Dominador do Ringue','Especialista em Contra-ataque','Campeão da Disciplina','Mestre da Técnica',
+      'Punho de Aço','Guerreiro de Elite','Lutador Implacável','Guardião da Resistência','Mestre dos Reflexos',
+      'Campeão das Combinações','Especialista do Ringue','Lenda dos Punhos','Mestre da Pressão','Estrategista do Boxe',
+      'Campeão Visionário','Guerreiro Lendário','Mestre do Nocaute Técnico','Guardião Supremo do Ringue','Lutador de Elite',
+      'Punho Lendário','Mestre da Esquiva','Campeão Absoluto','Lenda da Técnica','Rei do Ringue',
+      'Imperador dos Punhos','Mestre Invencível','Guardião dos Campeões','Lenda Mundial do Boxe','Titã do Ringue',
+      'Campeão Supremo','Mestre dos Mestres','Lenda Imortal do Boxe','Imperador do Ringue','👑 CEO do Ringue'
+    ]
+  },
+  corrida:{
+    label:'Corrida',
+    unit:'corridas concluídas',
+    icon:'🏃',
+    titles:[
+      'Primeiros Passos','Corredor Iniciante','Explorador de Rotas','Caçador de Quilômetros','Aprendiz do Ritmo',
+      'Corredor Persistente','Guardião da Constância','Atleta das Ruas','Ritmo de Aço','Mestre dos 5K',
+      'Caçador de Recordes','Corredor Resistente','Explorador de Distâncias','Guardião do Pace','Mestre da Respiração',
+      'Corredor de Elite','Guerreiro dos 10K','Atleta Implacável','Mestre da Velocidade','Lenda da Constância',
+      'Corredor Estratégico','Dominador das Rotas','Guardião da Resistência','Mestre do Desempenho','Caçador de Metas',
+      'Atleta de Longa Distância','Corredor Visionário','Mestre das Subidas','Lenda da Pista','Maratonista Iniciante',
+      'Maratonista de Elite','Mestre das Distâncias','Corredor Lendário','Guardião da Maratona','Atleta Supremo',
+      'Titã da Resistência','Lenda dos Quilômetros','Mestre do Pace','Corredor Invencível','Imperador das Pistas',
+      'Maratonista Visionário','Lenda da Velocidade','Guardião Supremo das Rotas','Mestre Universal da Corrida','Atleta Lendário',
+      'Titã das Distâncias','Campeão da Maratona','Lenda Imortal da Corrida','Imperador dos Quilômetros','👑 CEO da Corrida'
+    ]
+  },
+  academia:{
+    label:'Academia',
+    unit:'treinos concluídos',
+    icon:'🏋️',
+    titles:[
+      'Iniciante do Ferro','Aprendiz da Força','Construtor de Hábitos','Guerreiro da Academia','Discípulo da Disciplina',
+      'Força Iniciante','Guardião da Constância','Atleta Persistente','Força de Aço','Mestre da Técnica',
+      'Construtor de Potência','Guerreiro dos Pesos','Mestre da Progressão','Guardião da Forma','Atleta de Ferro',
+      'Mestre da Disciplina','Especialista em Força','Construtor de Resultados','Titã Iniciante','Atleta de Elite',
+      'Mestre da Hipertrofia','Guardião da Resistência','Força Implacável','Guerreiro da Evolução','Especialista em Performance',
+      'Titã da Constância','Mestre dos Pesos','Atleta Visionário','Lenda da Academia','Guardião Supremo da Força',
+      'Força Lendária','Mestre da Potência','Titã de Aço','Campeão da Disciplina','Mestre da Evolução',
+      'Atleta Supremo','Imperador dos Pesos','Lenda da Força','Colosso da Academia','Titã Visionário',
+      'Guardião dos Campeões','Mestre Universal da Força','Lenda Imortal do Ferro','Imperador da Academia','Colosso Supremo',
+      'Mestre dos Mestres','Atleta Lendário','Titã Absoluto','Imperador da Força','👑 CEO da Academia'
+    ]
+  }
+};
+
+Object.keys(ACTIVITY_LEVELS).forEach(function(key){
+  ACTIVITY_LEVELS[key].thresholds = Array.from({length:50},function(_,index){
+    return index * 5;
+  });
+});
+
+function activityProgress(category){
+  return countDone(state,category);
+}
+
+function activityCurrentLevel(category){
+  var cfg = ACTIVITY_LEVELS[category];
+  var progress = activityProgress(category);
+  var current = 1;
+  cfg.thresholds.forEach(function(required,index){
+    if(progress>=required) current=index+1;
+  });
+  return Math.min(current,cfg.thresholds.length);
+}
+
+function renderGeneralLevelItems(){
+  var currentLevel = level();
+  var items = '';
+  for(var lv=1; lv<=50; lv++){
+    var status = lv<currentLevel ? 'Concluído' : (lv===currentLevel ? 'Nível atual' : 'Bloqueado');
+    var classes = 'level-item'+(lv<currentLevel?' completed':'')+(lv===currentLevel?' current':'');
+    items += '<div class="'+classes+'">'+
+      '<div class="level-number">'+lv+'</div>'+
+      '<div>'+
+        '<div class="level-item-title">'+titleForLevel(lv)+'</div>'+
+        '<div class="level-item-xp">'+((lv-1)*100)+' XP necessários</div>'+
+      '</div>'+
+      '<div class="level-status">'+status+'</div>'+
+    '</div>';
+  }
+  return {
+    summary:'Você está no <strong>nível '+currentLevel+'</strong> com <strong>'+state.totalXP+' XP</strong> acumulados.',
+    items:items
+  };
+}
+
+function renderActivityLevelItems(category){
+  var cfg = ACTIVITY_LEVELS[category];
+  var progress = activityProgress(category);
+  var currentLevel = activityCurrentLevel(category);
+  var items = '';
+
+  cfg.titles.forEach(function(title,index){
+    var lv = index+1;
+    var required = cfg.thresholds[index];
+    var status = lv<currentLevel ? 'Concluído' : (lv===currentLevel ? 'Nível atual' : 'Bloqueado');
+    var classes = 'level-item'+(lv<currentLevel?' completed':'')+(lv===currentLevel?' current':'');
+    items += '<div class="'+classes+'">'+
+      '<div class="level-number">'+lv+'</div>'+
+      '<div>'+
+        '<div class="level-item-title">'+cfg.icon+' '+title+'</div>'+
+        '<div class="level-item-xp">'+required+' '+cfg.unit+'</div>'+
+      '</div>'+
+      '<div class="level-status">'+status+'</div>'+
+    '</div>';
+  });
+
+  return {
+    summary:'Você está no <strong>nível '+currentLevel+'</strong> de '+cfg.label+
+      ', com <strong>'+progress+' '+cfg.unit+'</strong>.',
+    items:items
+  };
+}
+
+function getTrackDashboardData(track){
+  if(track==='geral'){
+    var current = Math.min(level(),50);
+    var currentStart = (current-1)*100;
+    var nextStart = current*100;
+    var within = Math.max(0,state.totalXP-currentStart);
+    var needed = current>=50 ? 100 : 100;
+    var pct = current>=50 ? 100 : Math.min(100,Math.round((within/needed)*100));
+    return {
+      label:'Geral',
+      icon:'⭐',
+      level:current,
+      title:titleForLevel(current),
+      progress:state.totalXP,
+      nextTarget:nextStart,
+      remaining:current>=50 ? 0 : Math.max(0,nextStart-state.totalXP),
+      pct:pct,
+      unit:'XP',
+      nextTitle:current>=50 ? 'Nível máximo alcançado' : titleForLevel(current+1)
+    };
+  }
+
+  var cfg = ACTIVITY_LEVELS[track];
+  var progress = activityProgress(track);
+  var currentLevel = activityCurrentLevel(track);
+  var currentRequired = cfg.thresholds[currentLevel-1] || 0;
+  var nextRequired = currentLevel>=50
+    ? currentRequired
+    : cfg.thresholds[currentLevel];
+  var range = Math.max(1,nextRequired-currentRequired);
+  var pct = currentLevel>=50
+    ? 100
+    : Math.min(100,Math.round(((progress-currentRequired)/range)*100));
+
+  return {
+    label:cfg.label,
+    icon:cfg.icon,
+    level:currentLevel,
+    title:cfg.titles[currentLevel-1],
+    progress:progress,
+    nextTarget:nextRequired,
+    remaining:currentLevel>=50 ? 0 : Math.max(0,nextRequired-progress),
+    pct:pct,
+    unit:cfg.unit,
+    nextTitle:currentLevel>=50 ? 'Nível máximo alcançado' : cfg.titles[currentLevel]
+  };
+}
+
+function renderTrackLevelItems(track){
+  if(track==='geral') return renderGeneralLevelItems().items;
+  return renderActivityLevelItems(track).items;
+}
+
+function renderLevelModal(){
+  var tracks = [
+    {id:'geral',label:'Geral',icon:'⭐'},
+    {id:'leitura',label:'Leitura',icon:'📚'},
+    {id:'boxe',label:'Boxe',icon:'🥊'},
+    {id:'corrida',label:'Corrida',icon:'🏃'},
+    {id:'academia',label:'Academia',icon:'🏋️'}
+  ];
+
+  var current = getTrackDashboardData(activeLevelTrack);
+
+  var tabs = tracks.map(function(track){
+    return '<button class="level-dashboard-tab '+(activeLevelTrack===track.id?'active':'')+
+      '" data-level-track="'+track.id+'">'+
+      '<span class="tab-icon">'+track.icon+'</span>'+
+      '<span>'+track.label+'</span>'+
+    '</button>';
+  }).join('');
+
+  var summaries = tracks.map(function(track){
+    var data = getTrackDashboardData(track.id);
+    return '<div class="level-summary-card '+(activeLevelTrack===track.id?'active':'')+'">'+
+      '<div class="summary-icon">'+data.icon+'</div>'+
+      '<div class="summary-name">'+data.label+'</div>'+
+      '<div class="summary-level">Nível '+data.level+'</div>'+
+      '<div class="summary-title">'+data.title+'</div>'+
+      '<div class="mini-bar"><span style="width:'+data.pct+'%"></span></div>'+
+    '</div>';
+  }).join('');
+
+  var progressLabel = activeLevelTrack==='geral'
+    ? current.progress+' / '+current.nextTarget+' XP'
+    : current.progress+' / '+current.nextTarget+' '+current.unit;
+
+  var remainingText = current.remaining===0
+    ? 'Você alcançou o nível máximo desta trilha.'
+    : 'Faltam '+current.remaining+' '+current.unit+' para o próximo nível.';
+
+  return '<div class="level-modal" id="levelModal">'+
+    '<div class="level-modal-panel" role="dialog" aria-modal="true" aria-label="Dashboard de níveis">'+
+      '<div class="level-modal-head">'+
+        '<div><h2>Todos os níveis</h2>'+
+        '<p>Veja sua evolução geral e por atividade.</p></div>'+
+        '<button class="level-modal-close" id="closeLevelModal" aria-label="Fechar">×</button>'+
+      '</div>'+
+      '<div class="level-dashboard">'+
+        '<div class="level-dashboard-tabs">'+tabs+'</div>'+
+        '<section class="level-overview">'+
+          '<div class="level-badge-large" style="--level-progress:'+current.pct+'%">'+
+            '<div class="level-badge-core">'+
+              '<small>Nível</small>'+
+              '<strong>'+current.level+'</strong>'+
+              '<span>'+current.title+'</span>'+
+            '</div>'+
+          '</div>'+
+          '<div class="level-overview-main">'+
+            '<h3>Progresso '+(activeLevelTrack==='geral'?'geral':'em '+current.label)+'</h3>'+
+            '<div class="current-title">'+current.icon+' '+current.title+'</div>'+
+            '<div class="level-progress-numbers">'+
+              '<strong>'+current.progress+'</strong>'+
+              '<span>/ '+current.nextTarget+' '+current.unit+'</span>'+
+            '</div>'+
+            '<div class="level-progress-bar"><span style="width:'+current.pct+'%"></span></div>'+
+            '<div class="level-progress-help">'+remainingText+'</div>'+
+          '</div>'+
+          '<aside class="level-next-card">'+
+            '<div class="eyebrow">🏆 Próximo nível</div>'+
+            '<h4>'+current.nextTitle+'</h4>'+
+            '<p>'+progressLabel+'</p>'+
+          '</aside>'+
+        '</section>'+
+        '<div class="level-summary-grid">'+summaries+'</div>'+
+        '<section class="level-list-section">'+
+          '<h3>Lista completa — '+current.label+'</h3>'+
+          '<div class="level-list">'+renderTrackLevelItems(activeLevelTrack)+'</div>'+
+        '</section>'+
+      '</div>'+
+    '</div>'+
+  '</div>';
+}
+
+function bindLevelModalEvents(){
+  var modal = byId('levelModal');
+  var close = byId('closeLevelModal');
+
+  if(close) close.addEventListener('click',closeLevelModal);
+  if(modal){
+    modal.addEventListener('click',function(e){
+      if(e.target===modal) closeLevelModal();
+    });
+    modal.querySelectorAll('[data-level-track]').forEach(function(button){
+      button.addEventListener('click',function(){
+        activeLevelTrack = button.getAttribute('data-level-track');
+        modal.outerHTML = renderLevelModal();
+        bindLevelModalEvents();
+      });
+    });
+  }
+}
+
+function openLevelModal(){
+  if(byId('levelModal')) return;
+  document.body.insertAdjacentHTML('beforeend',renderLevelModal());
+  bindLevelModalEvents();
+  document.addEventListener('keydown',levelModalEscape);
+}
+
+function levelModalEscape(e){
+  if(e.key==='Escape') closeLevelModal();
+}
+
+function closeLevelModal(){
+  var modal = byId('levelModal');
+  if(modal) modal.remove();
+  document.removeEventListener('keydown',levelModalEscape);
+}
+
 
 function isScheduled(cat, dow){
   if(cat==='estudo' || cat==='leitura') return true;
@@ -2396,7 +3160,7 @@ function render(){
       '<div class="brand"><div class="mark">'+icon('trophy')+'</div>'+
         '<div><div class="name">Caderno de Campanha</div><div class="sub">'+WEEKDAYS[dateObj.getDay()]+'</div></div>'+
       '</div>'+
-      '<div class="level-card">'+
+      '<div class="level-card" data-open-levels="1" title="Ver todos os níveis">'+
         '<div class="ring-wrap">'+
           '<div class="ring">'+ringSVG(pct,56,6,'var(--gold)')+'<div class="lvl"><b>'+lv+'</b><span>NÍVEL</span></div></div>'+
           '<div><div class="level-title">'+titleForLevel(lv)+'</div><div class="level-xp">'+pct+'/100 XP</div></div>'+
@@ -2419,7 +3183,7 @@ function render(){
     '<div class="mobile-top">'+
       '<div class="brand"><div class="mark" style="width:28px;height:28px;border-radius:8px;">'+icon('trophy')+'</div>'+
         '<div class="name" style="font-size:13.5px;">Caderno de Campanha</div></div>'+
-      '<div class="ring">'+ringSVG(pct,40,5,'var(--gold)')+'<div class="lvl"><b>'+lv+'</b></div></div>'+
+      '<div class="ring" data-open-levels="1" title="Ver todos os níveis">'+ringSVG(pct,40,5,'var(--gold)')+'<div class="lvl"><b>'+lv+'</b></div></div>'+
     '</div>';
 
   var mobileNav =
@@ -2475,9 +3239,9 @@ function renderHoje(){
     '<p>Aqui estão as missões que mantêm sua campanha em movimento hoje.</p></div>';
 
   html += '<div class="hero">'+
-    '<div class="hero-ring">'+ringSVG(pct,98,9,'var(--gold)')+'<div class="lvl"><b>'+lv+'</b><span>nível</span></div></div>'+
+    '<div class="hero-ring" data-open-levels="1" title="Ver todos os níveis">'+ringSVG(pct,98,9,'var(--gold)')+'<div class="lvl"><b>'+lv+'</b><span>nível</span></div></div>'+
     '<div class="hero-info">'+
-      '<div class="title">'+titleForLevel(lv)+'</div>'+
+      '<div class="title">Progresso geral</div>'+
       '<div class="xp">'+state.totalXP+' XP acumulados · faltam '+(100-pct)+' XP para o próximo nível</div>'+
       '<div class="xpbar-track"><div class="xpbar-fill" style="width:'+pct+'%"></div></div>'+
       '<div class="streak-chips">'+ Object.keys(CATS).map(function(k){
@@ -2715,6 +3479,10 @@ function renderEmpregabilidade(){
 /* ================= EVENTOS ================= */
 
 function bindEvents(){
+  app.querySelectorAll('[data-open-levels]').forEach(function(el){
+    el.addEventListener('click',openLevelModal);
+  });
+
   app.querySelectorAll('[data-tab]').forEach(function(el){
     el.addEventListener('click', function(){
       activeTab = el.getAttribute('data-tab');
